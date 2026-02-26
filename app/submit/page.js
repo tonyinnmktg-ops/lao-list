@@ -1,14 +1,4 @@
-const { data, error } = await supabase.from('submissions').insert([{
-  ...form,
-  review_status: 'pending',
-  status: 'active'
-}])
-
-console.log('error:', error)
-console.log('data:', data)
-if (!error) setSubmitted(true)
-setLoading(false)'use 
-client'
+'use client'
 
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
@@ -41,11 +31,14 @@ export default function SubmitPage() {
     e.preventDefault()
     setLoading(true)
 
-    const { error } = await supabase.from('submissions').insert([{
+    const { data, error } = await supabase.from('submissions').insert([{
       ...form,
-      review_status: 'pending'
+      review_status: 'pending',
+      status: 'active'
     }])
 
+    console.log('error:', error)
+    console.log('data:', data)
     if (!error) setSubmitted(true)
     setLoading(false)
   }
