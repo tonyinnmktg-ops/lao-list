@@ -1,4 +1,14 @@
-'use client'
+const { data, error } = await supabase.from('submissions').insert([{
+  ...form,
+  review_status: 'pending',
+  status: 'active'
+}])
+
+console.log('error:', error)
+console.log('data:', data)
+if (!error) setSubmitted(true)
+setLoading(false)'use 
+client'
 
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
