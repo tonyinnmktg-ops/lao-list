@@ -1,6 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk'
-import { createClient } from '@supabase/supabase-js'
-
+const Anthropic = require('@anthropic-ai/sdk')
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const supabase = createClient(
