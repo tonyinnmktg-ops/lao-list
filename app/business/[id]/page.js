@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
 
-export default function BusinessPage({ params }) {
+export default function BusinessPage() {
+  const params = useParams()
   const [business, setBusiness] = useState(null)
 
   useEffect(() => {
@@ -15,7 +17,7 @@ export default function BusinessPage({ params }) {
         .single()
       if (data) setBusiness(data)
     }
-    fetchBusiness()
+    if (params.id) fetchBusiness()
   }, [params.id])
 
   if (!business) return <main className="max-w-2xl mx-auto p-6"><p>Loading...</p></main>
