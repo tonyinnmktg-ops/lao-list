@@ -46,13 +46,12 @@ e.target.value })} className="border p-2 rounded">
 
       <div className="grid gap-4">
         {businesses.map((biz) => (
-          <div key={biz.id} className="border rounded p-4">
-            <h2 className="text-xl font-semibold">{biz.name}</h2>
-            <p className="text-gray-500">{biz.category} — {biz.city}, 
-{biz.state}</p>
-            <p className="mt-2">{biz.description}</p>
-          </div>
-        ))}
+  <a key={biz.id} href={`/business/${biz.id}`} className="border rounded p-4 block hover:border-gray-400 transition">
+    <h2 className="text-xl font-semibold">{biz.name}</h2>
+    <p className="text-gray-500">{biz.category} — {biz.city}, {biz.state}</p>
+    <p className="mt-2">{biz.description}</p>
+  </a>
+))}
         {businesses.length === 0 && <p className="text-gray-400">No 
 businesses found.</p>}
       </div>
