@@ -9,7 +9,14 @@ const supabase = createClient(
 )
 
 export async function POST(req) {
-  const { submissionId } = await req.json()
+  let submissionId
+try {
+  const body = await req.json()
+  submissionId = body.submissionId
+} catch {
+  const url = new URL(req.url)
+  submissionId = url.searchParams.get('submissionId')
+}
 
   const { data: submission, error } = await supabase
     .from('submissions')
