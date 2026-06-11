@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geist.variable} ${geistMono.variable}`}>
+      <body className={`${Geist.variable} ${GeistMono.variable}`}>
         <Navbar />
         {children}
       </body>
