@@ -12,7 +12,13 @@ export async function POST(req) {
   let submissionId
 try {
   const body = await req.json()
-  submissionId = body.submissionId
+  if (body.submissionId) {
+    submissionId = body.submissionId
+  } else if (body.record && body.record.id) {
+    submissionId = body.record.id
+  } else if (body.id) {
+    submissionId = body.id
+  }
 } catch {
   const url = new URL(req.url)
   submissionId = url.searchParams.get('submissionId')
