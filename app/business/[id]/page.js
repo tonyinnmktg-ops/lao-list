@@ -77,8 +77,7 @@ export default function BusinessPage() {
           {business.instagram && (
             <div className="flex gap-3">
               <span className="font-semibold text-gray-700 w-32 shrink-0">Instagram</span>
-              <a href={`https://instagram.com/${business.instagram}`} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline">@{business.instagram}</a>
-            </div>
+<a href={`https://instagram.com/${business.instagram.replace('@', '')}`} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline">@{business.instagram.replace('@', '')}</a>            </div>
           )}
           {business.facebook && (
             <div className="flex gap-3">
