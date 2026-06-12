@@ -7,9 +7,9 @@ export default function Navbar() {
         Lao List
       </Link>
       <div className="flex gap-6">
-        <Link href="/" className="text-white opacity-80 hover:opacity-100 text-sm font-medium transition">
-          Directory
-        </Link>
+<Link href="/" className="text-white text-sm font-medium hover:opacity-80 transition">
+  Directory
+</Link>
         <Link href="/submit" style={{ backgroundColor: '#f0f9f4', color: '#2d5a3d' }} className="text-sm font-semibold px-4 py-2 rounded-full hover:opacity-90 transition">
           Submit a Business
         </Link>

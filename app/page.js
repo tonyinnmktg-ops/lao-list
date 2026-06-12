@@ -46,7 +46,7 @@ if (search) {
             placeholder="Search by name, city, category..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="flex-1 px-4 py-3 rounded-full text-gray-900 text-sm focus:outline-none"
+            className="flex-1 px-4 py-3 rounded-full text-gray-900 text-sm focus:outline-none bg-white shadow-sm"
           />
           <button
             type="submit"
