@@ -30,72 +30,127 @@ export default function SubmitPage() {
   async function handleSubmit(e) {
     e.preventDefault()
     setLoading(true)
-
-    const { data, error } = await supabase.from('submissions').insert([{
+    const { error } = await supabase.from('submissions').insert([{
       ...form,
       review_status: 'pending',
       status: 'active'
     }])
-
-    console.log('error:', error)
-    console.log('data:', data)
     if (!error) setSubmitted(true)
     setLoading(false)
   }
 
   if (submitted) return (
-    <main className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Thank you!</h1>
-      <p>Your submission is under review and will be added to Lao List 
-shortly.</p>
+    <main className="max-w-2xl mx-auto px-6 py-12">
+      <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+        <div className="text-4xl mb-4">🎉</div>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Thank you!</h1>
+        <p className="text-gray-500">Your submission is under review and will be added to Lao List shortly.</p>
+        <a href="/" style={{ backgroundColor: '#2d5a3d' }} className="inline-block mt-6 text-white font-semibold px-6 py-3 rounded-full hover:opacity-90 transition">
+          Back to Directory
+        </a>
+      </div>
     </main>
   )
 
+  const inputClass = "w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-700 bg-white"
+  const labelClass = "block text-sm font-medium text-gray-700 mb-1"
+
   return (
-    <main className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Submit a Business</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <input name="name" placeholder="Business Name *" required 
-onChange={handleChange} className="border p-2 rounded" />
-        <select name="category" required onChange={handleChange} 
-className="border p-2 rounded">
-          <option value="">Select Category *</option>
-          <option value="restaurant">Restaurant</option>
-          <option value="nonprofit">Nonprofit</option>
-          <option value="service">Service</option>
-          <option value="retail">Retail</option>
-          <option value="other">Other</option>
-        </select>
-        <textarea name="description" placeholder="Description" 
-onChange={handleChange} className="border p-2 rounded" />
-        <input name="address" placeholder="Street Address" 
-onChange={handleChange} className="border p-2 rounded" />
-        <input name="city" placeholder="City" onChange={handleChange} 
-className="border p-2 rounded" />
-        <input name="state" placeholder="State (e.g. MN)" 
-onChange={handleChange} className="border p-2 rounded" />
-        <input name="zip" placeholder="Zip Code" onChange={handleChange} 
-className="border p-2 rounded" />
-        <input name="phone" placeholder="Phone Number" 
-onChange={handleChange} className="border p-2 rounded" />
-        <input name="website" placeholder="Website URL" 
-onChange={handleChange} className="border p-2 rounded" />
-        <input name="instagram" placeholder="Instagram Handle" 
-onChange={handleChange} className="border p-2 rounded" />
-        <input name="facebook" placeholder="Facebook URL" 
-onChange={handleChange} className="border p-2 rounded" />
-        <input name="submitter_email" type="email" placeholder="Your Email 
-*" required onChange={handleChange} className="border p-2 rounded" />
-        <label className="flex items-center gap-2">
-          <input name="is_lao_owned" type="checkbox" defaultChecked 
-onChange={handleChange} />
-          This is a Lao-owned or Lao-inspired business
-        </label>
-        <button type="submit" disabled={loading} className="bg-black 
-text-white p-2 rounded">
-          {loading ? 'Submitting...' : 'Submit Business'}
-        </button>
-      </form>
+    <main className="max-w-2xl mx-auto px-6 py-12">
+      <a href="/" className="text-sm font-medium mb-8 inline-block" style={{ color: '#2d5a3d' }}>
+        ← Back to Directory
+      </a>
+
+      <div className="bg-white rounded-2xl border border-gray-100 p-8 mt-4">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Submit a Business</h1>
+        <p className="text-gray-500 text-sm mb-8">Know a Lao-owned or Lao-inspired business? Add it to the directory.</p>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <div>
+            <label className={labelClass}>Business Name *</label>
+            <input name="name" required onChange={handleChange} className={inputClass} />
+          </div>
+
+          <div>
+            <label className={labelClass}>Category *</label>
+            <select name="category" required onChange={handleChange} className={inputClass}>
+              <option value="">Select a category</option>
+              <option value="restaurant">Restaurant</option>
+              <option value="nonprofit">Nonprofit</option>
+              <option value="service">Service</option>
+              <option value="retail">Retail</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div>
+            <label className={labelClass}>Description</label>
+            <textarea name="description" onChange={handleChange} rows={3} className={inputClass} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>City</label>
+              <input name="city" onChange={handleChange} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>State</label>
+              <input name="state" onChange={handleChange} className={inputClass} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Street Address</label>
+              <input name="address" onChange={handleChange} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Zip Code</label>
+              <input name="zip" onChange={handleChange} className={inputClass} />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>Phone Number</label>
+            <input name="phone" onChange={handleChange} className={inputClass} />
+          </div>
+
+          <div>
+            <label className={labelClass}>Website</label>
+            <input name="website" onChange={handleChange} className={inputClass} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Instagram Handle</label>
+              <input name="instagram" onChange={handleChange} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Facebook URL</label>
+              <input name="facebook" onChange={handleChange} className={inputClass} />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>Your Email *</label>
+            <input name="submitter_email" type="email" required onChange={handleChange} className={inputClass} />
+          </div>
+
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input name="is_lao_owned" type="checkbox" defaultChecked onChange={handleChange} className="w-4 h-4 accent-green-700" />
+            <span className="text-sm text-gray-700">This is a Lao-owned or Lao-inspired business</span>
+          </label>
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{ backgroundColor: '#2d5a3d' }}
+            className="text-white font-semibold py-3 rounded-full hover:opacity-90 transition mt-2"
+          >
+            {loading ? 'Submitting...' : 'Submit Business'}
+          </button>
+        </form>
+      </div>
     </main>
   )
 }
