@@ -3,43 +3,18 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-const CATEGORIES = [
-  { label: 'Restaurants', value: 'Laotian restaurant' },
-  { label: 'Nonprofits', value: 'nonprofit' },
-  { label: 'Services', value: 'service' },
-  { label: 'Retail', value: 'retail' },
-]
-
 export default function Home() {
   const [businesses, setBusinesses] = useState([])
-  const [categoryData, setCategoryData] = useState({})
   const [filter, setFilter] = useState({ state: '', category: '' })
   const [search, setSearch] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const [view, setView] = useState('home')
 
   useEffect(() => {
-    if (view === 'home' && !search && !filter.state && !filter.category) {
-      fetchCategoryPreviews()
-    } else {
+    if (view !== 'home') {
       fetchBusinesses()
     }
   }, [filter, search, view])
-
-  async function fetchCategoryPreviews() {
-    const categories = ['Laotian restaurant', 'nonprofit', 'service', 'retail']
-    const results = {}
-    for (const cat of categories) {
-      const { data } = await supabase
-        .from('businesses')
-        .select('*')
-        .eq('status', 'active')
-        .ilike('category', `%${cat}%`)
-        .limit(3)
-      results[cat] = data || []
-    }
-    setCategoryData(results)
-  }
 
   async function fetchBusinesses() {
     let query = supabase.from('businesses').select('*').eq('status', 'active')
@@ -63,10 +38,7 @@ export default function Home() {
   function showDirectory(category = '') {
     setFilter({ state: '', category })
     setView('directory')
-    fetchBusinesses()
   }
-
-  const isHomeView = view === 'home' && !search && !filter.state && !filter.category
 
   return (
     <main>
@@ -94,55 +66,27 @@ export default function Home() {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-8">
-        {isHomeView ? (
-<div>
-  <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Category</h2>
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-    {[
-      { label: 'Restaurants', value: 'Laotian restaurant', image: '/images/lao-restaurant.jpg' },
-      { label: 'Nonprofits', value: 'nonprofit', image: '/images/lao-nonprofit.jpg' },
-      { label: 'Services', value: 'service', image: '/images/lao-services.jpg' },
-      { label: 'Retail', value: 'retail', image: '/images/lao-retail.webp' },
-    ].map(({ label, value, image }) => (
-      <button
-        key={value}
-        onClick={() => showDirectory(value)}
-        className="relative rounded-2xl overflow-hidden h-40 group cursor-pointer"
-      >
-        <img src={image} alt={label} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-        <div className="absolute inset-0 bg-black opacity-40 group-hover:opacity-30 transition" />
-        <span className="absolute inset-0 flex items-end p-4 text-white font-bold text-lg">{label}</span>
-      </button>
-    ))}
-  </div>
-</div>
-                <div className="grid gap-3">
-                  {(categoryData[value] || []).length === 0 && (
-                    <p className="text-gray-400 text-sm">No listings yet.</p>
-                  )}
-                  {(categoryData[value] || []).map((biz) => (
-                    <a
-                      key={biz.id}
-                      href={`/business/${biz.id}`}
-                      className="bg-white border border-gray-100 rounded-xl p-5 block hover:shadow-md hover:border-gray-200 transition"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">{biz.name}</h3>
-                          <p className="text-sm text-gray-500 mt-1">{biz.category} · {biz.city}, {biz.state}</p>
-                          {biz.description && <p className="text-sm text-gray-600 mt-2">{biz.description}</p>}
-                        </div>
-                        {biz.is_lao_owned && (
-                          <span style={{ backgroundColor: '#f0f9f4', color: '#2d5a3d' }} className="text-xs font-semibold px-3 py-1 rounded-full ml-4 whitespace-nowrap">
-                            Lao Owned
-                          </span>
-                        )}
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            ))}
+        {view === 'home' ? (
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Category</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+              {[
+                { label: 'Restaurants', value: 'Laotian restaurant', image: '/images/lao-restaurant.jpg' },
+                { label: 'Nonprofits', value: 'nonprofit', image: '/images/lao-nonprofit.jpg' },
+                { label: 'Services', value: 'service', image: '/images/lao-services.jpg' },
+                { label: 'Retail', value: 'retail', image: '/images/lao-retail.webp' },
+              ].map(({ label, value, image }) => (
+                <button
+                  key={value}
+                  onClick={() => showDirectory(value)}
+                  className="relative rounded-2xl overflow-hidden h-40 group cursor-pointer"
+                >
+                  <img src={image} alt={label} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                  <div className="absolute inset-0 bg-black opacity-40 group-hover:opacity-30 transition" />
+                  <span className="absolute inset-0 flex items-end p-4 text-white font-bold text-lg">{label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           <>
@@ -199,7 +143,7 @@ export default function Home() {
 
             <div className="grid gap-4">
               {businesses.map((biz) => (
-                <a
+                
                   key={biz.id}
                   href={`/business/${biz.id}`}
                   className="bg-white border border-gray-100 rounded-xl p-5 block hover:shadow-md hover:border-gray-200 transition"
