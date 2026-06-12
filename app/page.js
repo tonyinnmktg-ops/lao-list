@@ -32,7 +32,7 @@ export default function Home() {
         <div className="flex gap-3 mb-8 flex-wrap">
           <select
             onChange={(e) => setFilter({ ...filter, state: e.target.value })}
-            className="border border-gray-200 bg-white px-4 py-2 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-green-700"
+            className="border border-gray-200 bg-white px-4 py-2 rounded-full text-sm font-medium focus:outline-none"
           >
             <option value="">All States</option>
             <option value="California">California</option>
@@ -49,7 +49,7 @@ export default function Home() {
 
           <select
             onChange={(e) => setFilter({ ...filter, category: e.target.value })}
-            className="border border-gray-200 bg-white px-4 py-2 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-green-700"
+            className="border border-gray-200 bg-white px-4 py-2 rounded-full text-sm font-medium focus:outline-none"
           >
             <option value="">All Categories</option>
             <option value="restaurant">Restaurant</option>
