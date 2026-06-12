@@ -20,59 +20,73 @@ export default function BusinessPage() {
     if (params.id) fetchBusiness()
   }, [params.id])
 
-  if (!business) return <main className="max-w-2xl mx-auto p-6"><p>Loading...</p></main>
+  if (!business) return (
+    <main className="max-w-3xl mx-auto px-6 py-12">
+      <p className="text-gray-400">Loading...</p>
+    </main>
+  )
 
   return (
-    <main className="max-w-2xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-2">{business.name}</h1>
-      <p className="text-gray-500 mb-6">{business.category} — {business.city}, {business.state}</p>
+    <main className="max-w-3xl mx-auto px-6 py-12">
+      <a href="/" className="text-sm font-medium mb-8 inline-block" style={{ color: '#2d5a3d' }}>
+        ← Back to Directory
+      </a>
 
-      {business.description && (
-        <p className="mb-6">{business.description}</p>
-      )}
+      <div className="bg-white rounded-2xl border border-gray-100 p-8 mt-4">
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">{business.name}</h1>
+            <p className="text-gray-500 mt-1">{business.category} · {business.city}, {business.state}</p>
+          </div>
+          {business.is_lao_owned && (
+            <span style={{ backgroundColor: '#f0f9f4', color: '#2d5a3d' }} className="text-xs font-semibold px-3 py-1 rounded-full ml-4 whitespace-nowrap">
+              Lao Owned
+            </span>
+          )}
+        </div>
 
-      <div className="flex flex-col gap-3">
-        {business.address && (
-          <div>
-            <span className="font-semibold">Address: </span>
-            {business.address}, {business.city}, {business.state} {business.zip}
-          </div>
+        {business.description && (
+          <p className="text-gray-600 mb-8 leading-relaxed">{business.description}</p>
         )}
-        {business.phone && (
-          <div>
-            <span className="font-semibold">Phone: </span>
-            <a href={`tel:${business.phone}`} className="text-blue-500">{business.phone}</a>
-          </div>
-        )}
-{business.google_url && (
-  <div>
-    <span className="font-semibold">Google Maps: </span>
-    <a href={business.google_url} target="_blank" className="text-blue-500">View on Google Maps</a>
-  </div>
-)}
-        {business.website && (
-          <div>
-            <span className="font-semibold">Website: </span>
-            <a href={business.website} target="_blank" className="text-blue-500">{business.website}</a>
-          </div>
-        )}
-        {business.instagram && (
-          <div>
-            <span className="font-semibold">Instagram: </span>
-            <a href={`https://instagram.com/${business.instagram}`} target="_blank" className="text-blue-500">@{business.instagram}</a>
-          </div>
-        )}
-        {business.facebook && (
-          <div>
-            <span className="font-semibold">Facebook: </span>
-            <a href={business.facebook} target="_blank" className="text-blue-500">{business.facebook}</a>
-          </div>
-        )}
-        {business.is_lao_owned && (
-          <div className="mt-4 inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-            Lao Owned
-          </div>
-        )}
+
+        <div className="flex flex-col gap-4 border-t border-gray-100 pt-6">
+          {business.address && (
+            <div className="flex gap-3">
+              <span className="font-semibold text-gray-700 w-32 shrink-0">Address</span>
+              <span className="text-gray-600">{business.address}, {business.city}, {business.state} {business.zip}</span>
+            </div>
+          )}
+          {business.phone && (
+            <div className="flex gap-3">
+              <span className="font-semibold text-gray-700 w-32 shrink-0">Phone</span>
+              <a href={`tel:${business.phone}`} style={{ color: '#2d5a3d' }} className="hover:underline">{business.phone}</a>
+            </div>
+          )}
+          {business.website && (
+            <div className="flex gap-3">
+              <span className="font-semibold text-gray-700 w-32 shrink-0">Website</span>
+              <a href={business.website} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline">{business.website}</a>
+            </div>
+          )}
+          {business.google_url && (
+            <div className="flex gap-3">
+              <span className="font-semibold text-gray-700 w-32 shrink-0">Google Maps</span>
+              <a href={business.google_url} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline">View on Google Maps</a>
+            </div>
+          )}
+          {business.instagram && (
+            <div className="flex gap-3">
+              <span className="font-semibold text-gray-700 w-32 shrink-0">Instagram</span>
+              <a href={`https://instagram.com/${business.instagram}`} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline">@{business.instagram}</a>
+            </div>
+          )}
+          {business.facebook && (
+            <div className="flex gap-3">
+              <span className="font-semibold text-gray-700 w-32 shrink-0">Facebook</span>
+              <a href={business.facebook} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline">{business.facebook}</a>
+            </div>
+          )}
+        </div>
       </div>
     </main>
   )
