@@ -27,14 +27,19 @@ export default function Home() {
       <h1 className="text-3xl font-bold mb-6">Lao List</h1>
 
       <div className="flex gap-4 mb-6">
-        <select onChange={(e) => setFilter({ ...filter, state: 
-e.target.value })} className="border p-2 rounded">
-          <option value="">All States</option>
-          <option value="CA">California</option>
-          <option value="MN">Minnesota</option>
-          <option value="TX">Texas</option>
-        </select>
-
+<select onChange={(e) => setFilter({ ...filter, state: e.target.value })} className="border p-2 rounded">
+  <option value="">All States</option>
+  <option value="California">California</option>
+  <option value="Texas">Texas</option>
+  <option value="Minnesota">Minnesota</option>
+  <option value="Washington">Washington</option>
+  <option value="Georgia">Georgia</option>
+  <option value="Illinois">Illinois</option>
+  <option value="North Carolina">North Carolina</option>
+  <option value="Massachusetts">Massachusetts</option>
+  <option value="Wisconsin">Wisconsin</option>
+  <option value="Kansas">Kansas</option>
+</select>
         <select onChange={(e) => setFilter({ ...filter, category: 
 e.target.value })} className="border p-2 rounded">
           <option value="">All Categories</option>
