@@ -95,24 +95,27 @@ export default function Home() {
 
       <div className="max-w-4xl mx-auto px-6 py-8">
         {isHomeView ? (
-          <div className="flex flex-col gap-12">
-            {[
-              { label: 'Restaurants', value: 'Laotian restaurant' },
-              { label: 'Nonprofits', value: 'nonprofit' },
-              { label: 'Services', value: 'service' },
-              { label: 'Retail', value: 'retail' },
-            ].map(({ label, value }) => (
-              <div key={value}>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">{label}</h2>
-                  <button
-                    onClick={() => showDirectory(value)}
-                    style={{ color: '#2d5a3d' }}
-                    className="text-sm font-medium hover:underline"
-                  >
-                    View all →
-                  </button>
-                </div>
+<div>
+  <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Category</h2>
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+    {[
+      { label: 'Restaurants', value: 'Laotian restaurant', image: '/images/lao-restaurant.jpg' },
+      { label: 'Nonprofits', value: 'nonprofit', image: '/images/lao-nonprofit.jpg' },
+      { label: 'Services', value: 'service', image: '/images/lao-services.jpg' },
+      { label: 'Retail', value: 'retail', image: '/images/lao-retail.webp' },
+    ].map(({ label, value, image }) => (
+      <button
+        key={value}
+        onClick={() => showDirectory(value)}
+        className="relative rounded-2xl overflow-hidden h-40 group cursor-pointer"
+      >
+        <img src={image} alt={label} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+        <div className="absolute inset-0 bg-black opacity-40 group-hover:opacity-30 transition" />
+        <span className="absolute inset-0 flex items-end p-4 text-white font-bold text-lg">{label}</span>
+      </button>
+    ))}
+  </div>
+</div>
                 <div className="grid gap-3">
                   {(categoryData[value] || []).length === 0 && (
                     <p className="text-gray-400 text-sm">No listings yet.</p>
