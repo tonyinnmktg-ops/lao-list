@@ -76,7 +76,7 @@ export default function Home() {
                 { label: 'Services', value: 'service', image: '/images/lao-services.jpg' },
                 { label: 'Retail', value: 'retail', image: '/images/lao-retail.webp' },
               ].map(({ label, value, image }) => (
-                  onClick={()<button
+                <button
                   key={value}
                   onClick={() => showDirectory(value)}
                   className="relative rounded-2xl overflow-hidden h-40 group cursor-pointer"
@@ -89,7 +89,7 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          <>
+          <div>
             <div className="flex gap-3 mb-8 flex-wrap items-center">
               <select
                 onChange={(e) => { setFilter({ ...filter, state: e.target.value }); setView('directory') }}
@@ -120,12 +120,14 @@ export default function Home() {
                 <option value="other">Other</option>
               </select>
 
-href="/"
-  style={{ color: '#2d5a3d' }}
-  className="text-sm px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition"
->
-  ← Home
-</a>
+              <a
+                href="/"
+                style={{ color: '#2d5a3d' }}
+                className="text-sm px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition"
+              >
+               Back to Home
+              </a>
+
               {search && (
                 <button
                   onClick={() => { setSearch(''); setSearchInput('') }}
@@ -164,7 +166,7 @@ href="/"
                 <p className="text-gray-400 text-center py-12">No businesses found.</p>
               )}
             </div>
-          </>
+          </div>
         )}
       </div>
     </main>
