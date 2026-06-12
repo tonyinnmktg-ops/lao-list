@@ -143,7 +143,7 @@ export default function Home() {
 
             <div className="grid gap-4">
               {businesses.map((biz) => (
-                
+                <a
                   key={biz.id}
                   href={`/business/${biz.id}`}
                   className="bg-white border border-gray-100 rounded-xl p-5 block hover:shadow-md hover:border-gray-200 transition"
