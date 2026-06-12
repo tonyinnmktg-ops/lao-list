@@ -15,10 +15,12 @@ export default function Home() {
 
   async function fetchBusinesses() {
     let query = supabase.from('businesses').select('*').eq('status', 'active')
+if (search) {
+  query = query.or(
+    `name.ilike.%${search}%,city.ilike.%${search}%,category.ilike.%${search}%,description.ilike.%${search}%`
+  )
+}
 
-    if (search) {
-      query = query.textSearch('fts', search, { type: 'websearch' })
-    }
     if (filter.state) query = query.eq('state', filter.state)
     if (filter.category) query = query.eq('category', filter.category)
 
