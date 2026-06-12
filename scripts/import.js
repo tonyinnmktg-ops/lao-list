@@ -25,6 +25,7 @@ async function importBusinesses() {
       zip: item.postalCode || null,
       phone: item.phone || null,
       website: item.website !== 'undefined' ? item.website : null,
+      google_url: item.url || null,
       instagram: null,
       facebook: null,
       is_lao_owned: true,

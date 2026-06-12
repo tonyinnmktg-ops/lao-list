@@ -44,6 +44,12 @@ export default function BusinessPage() {
             <a href={`tel:${business.phone}`} className="text-blue-500">{business.phone}</a>
           </div>
         )}
+{business.google_url && (
+  <div>
+    <span className="font-semibold">Google Maps: </span>
+    <a href={business.google_url} target="_blank" className="text-blue-500">View on Google Maps</a>
+  </div>
+)}
         {business.website && (
           <div>
             <span className="font-semibold">Website: </span>
