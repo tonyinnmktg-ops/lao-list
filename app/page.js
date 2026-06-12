@@ -6,30 +6,58 @@ import { supabase } from '../lib/supabase'
 export default function Home() {
   const [businesses, setBusinesses] = useState([])
   const [filter, setFilter] = useState({ state: '', category: '' })
+  const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
 
   useEffect(() => {
     fetchBusinesses()
-  }, [filter])
+  }, [filter, search])
 
   async function fetchBusinesses() {
     let query = supabase.from('businesses').select('*').eq('status', 'active')
+
+    if (search) {
+      query = query.textSearch('fts', search, { type: 'websearch' })
+    }
     if (filter.state) query = query.eq('state', filter.state)
     if (filter.category) query = query.eq('category', filter.category)
+
     const { data } = await query
     if (data) setBusinesses(data)
+  }
+
+  function handleSearch(e) {
+    e.preventDefault()
+    setSearch(searchInput)
   }
 
   return (
     <main>
       <div style={{ backgroundColor: '#2d5a3d' }} className="px-6 py-16 text-center">
         <h1 className="text-4xl font-bold text-white mb-3">Discover Lao Businesses</h1>
-        <p className="text-white opacity-70 text-lg max-w-xl mx-auto">
+        <p className="text-white opacity-70 text-lg max-w-xl mx-auto mb-8">
           A community directory of Lao-owned and Lao-inspired businesses across the United States.
         </p>
+        <form onSubmit={handleSearch} className="max-w-xl mx-auto flex gap-2">
+          <input
+            type="text"
+            placeholder="Search by name, city, category..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="flex-1 px-4 py-3 rounded-full text-gray-900 text-sm focus:outline-none"
+          />
+          <button
+            type="submit"
+            className="px-6 py-3 rounded-full font-semibold text-sm transition"
+            style={{ backgroundColor: '#f0f9f4', color: '#2d5a3d' }}
+          >
+            Search
+          </button>
+        </form>
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-8">
-        <div className="flex gap-3 mb-8 flex-wrap">
+        <div className="flex gap-3 mb-8 flex-wrap items-center">
           <select
             onChange={(e) => setFilter({ ...filter, state: e.target.value })}
             className="border border-gray-200 bg-white px-4 py-2 rounded-full text-sm font-medium focus:outline-none"
@@ -59,14 +87,23 @@ export default function Home() {
             <option value="other">Other</option>
           </select>
 
-          <span className="text-sm text-gray-400 self-center">{businesses.length} listings</span>
+          {search && (
+            <button
+              onClick={() => { setSearch(''); setSearchInput('') }}
+              className="text-sm px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition"
+              style={{ color: '#2d5a3d' }}
+            >
+              Clear search
+            </button>
+          )}
+
+          <span className="text-sm text-gray-400">{businesses.length} listings</span>
         </div>
 
         <div className="grid gap-4">
           {businesses.map((biz) => (
             
-              <a
-key={biz.id}
+              key={biz.id}
               href={`/business/${biz.id}`}
               className="bg-white border border-gray-100 rounded-xl p-5 block hover:shadow-md hover:border-gray-200 transition"
             >
