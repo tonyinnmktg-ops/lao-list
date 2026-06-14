@@ -125,6 +125,28 @@ export default function Home() {
               </div>
             )}
 
+<div className="mb-12">
+  <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by City</h2>
+  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+    {[
+      'Houston', 'Minneapolis', 'Los Angeles', 'Dallas', 'Atlanta', 'Seattle'
+    ].map((city) => (
+      <button
+        key={city}
+        onClick={() => {
+          setFilter({ state: '', category: '' })
+          setSearch(city)
+          setSearchInput(city)
+          setView('directory')
+        }}
+        className="text-left px-5 py-4 bg-white border border-gray-100 rounded-xl hover:shadow-md hover:border-gray-200 transition"
+      >
+        <span className="font-medium text-gray-900">{city}</span>
+      </button>
+    ))}
+  </div>
+</div>
+
             <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Category</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
               {categories.map(({ label, value, image }) => {
