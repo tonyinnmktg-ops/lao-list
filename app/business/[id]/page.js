@@ -21,68 +21,69 @@ export default function BusinessPage() {
   }, [params.id])
 
   if (!business) return (
-    <main className="max-w-3xl mx-auto px-6 py-12">
+    <main className="max-w-3xl mx-auto px-4 py-12">
       <p className="text-gray-400">Loading...</p>
     </main>
   )
 
   return (
-    <main className="max-w-3xl mx-auto px-6 py-12">
+    <main className="max-w-3xl mx-auto px-4 py-8">
       <a href="/" className="text-sm font-medium mb-8 inline-block" style={{ color: '#2d5a3d' }}>
-        ← Back to Directory
+        Back to Directory
       </a>
 
-      <div className="bg-white rounded-2xl border border-gray-100 p-8 mt-4">
-        <div className="flex items-start justify-between mb-6">
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 mt-4">
+        <div className="flex items-start justify-between mb-6 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{business.name}</h1>
-            <p className="text-gray-500 mt-1">{business.category} · {business.city}, {business.state}</p>
+            <h1 className="text-2xl font-bold text-gray-900">{business.name}</h1>
+            <p className="text-gray-500 mt-1 text-sm">{business.category} · {business.city}, {business.state}</p>
           </div>
           {business.is_lao_owned && (
-            <span style={{ backgroundColor: '#f0f9f4', color: '#2d5a3d' }} className="text-xs font-semibold px-3 py-1 rounded-full ml-4 whitespace-nowrap">
+            <span style={{ backgroundColor: '#f0f9f4', color: '#2d5a3d' }} className="text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap shrink-0">
               Lao Owned
             </span>
           )}
         </div>
 
         {business.description && (
-          <p className="text-gray-600 mb-8 leading-relaxed">{business.description}</p>
+          <p className="text-gray-600 mb-6 leading-relaxed text-sm">{business.description}</p>
         )}
 
         <div className="flex flex-col gap-4 border-t border-gray-100 pt-6">
           {business.address && (
-            <div className="flex gap-3">
-              <span className="font-semibold text-gray-700 w-32 shrink-0">Address</span>
-              <span className="text-gray-600">{business.address}, {business.city}, {business.state} {business.zip}</span>
+            <div className="flex flex-col sm:flex-row sm:gap-3">
+              <span className="font-semibold text-gray-700 text-sm sm:w-28 shrink-0">Address</span>
+              <span className="text-gray-600 text-sm break-words">{business.address}, {business.city}, {business.state} {business.zip}</span>
             </div>
           )}
           {business.phone && (
-            <div className="flex gap-3">
-              <span className="font-semibold text-gray-700 w-32 shrink-0">Phone</span>
-              <a href={`tel:${business.phone}`} style={{ color: '#2d5a3d' }} className="hover:underline">{business.phone}</a>
+            <div className="flex flex-col sm:flex-row sm:gap-3">
+              <span className="font-semibold text-gray-700 text-sm sm:w-28 shrink-0">Phone</span>
+              <a href={'tel:' + business.phone} style={{ color: '#2d5a3d' }} className="hover:underline text-sm break-all">{business.phone}</a>
             </div>
           )}
           {business.website && (
-            <div className="flex gap-3">
-              <span className="font-semibold text-gray-700 w-32 shrink-0">Website</span>
-              <a href={business.website} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline">{business.website}</a>
+            <div className="flex flex-col sm:flex-row sm:gap-3">
+              <span className="font-semibold text-gray-700 text-sm sm:w-28 shrink-0">Website</span>
+              <a href={business.website} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline text-sm break-all">{business.website}</a>
             </div>
           )}
           {business.google_url && (
-            <div className="flex gap-3">
-              <span className="font-semibold text-gray-700 w-32 shrink-0">Google Maps</span>
-              <a href={business.google_url} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline">View on Google Maps</a>
+            <div className="flex flex-col sm:flex-row sm:gap-3">
+              <span className="font-semibold text-gray-700 text-sm sm:w-28 shrink-0">Google Maps</span>
+              <a href={business.google_url} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline text-sm">View on Google Maps</a>
             </div>
           )}
           {business.instagram && (
-            <div className="flex gap-3">
-              <span className="font-semibold text-gray-700 w-32 shrink-0">Instagram</span>
-<a href={`https://instagram.com/${business.instagram.replace('@', '')}`} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline">@{business.instagram.replace('@', '')}</a>            </div>
+            <div className="flex flex-col sm:flex-row sm:gap-3">
+              <span className="font-semibold text-gray-700 text-sm sm:w-28 shrink-0">Instagram</span>
+              <a href={'https://instagram.com/' + business.instagram.replace('@', '')} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline text-sm break-all">@{business.instagram.replace('@', '')}</a>
+            </div>
           )}
           {business.facebook && (
-            <div className="flex gap-3">
-              <span className="font-semibold text-gray-700 w-32 shrink-0">Facebook</span>
-              <a href={business.facebook} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline">{business.facebook}</a>
+            <div className="flex flex-col sm:flex-row sm:gap-3">
+              <span className="font-semibold text-gray-700 text-sm sm:w-28 shrink-0">Facebook</span>
+              <a href={business.facebook} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline text-sm break-all">{business.facebook}</a>
             </div>
           )}
         </div>
