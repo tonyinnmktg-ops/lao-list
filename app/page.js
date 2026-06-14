@@ -54,12 +54,21 @@ export default function Home() {
     setView('directory')
   }
 
+  function showCity(city) {
+    setSearch(city)
+    setSearchInput(city)
+    setFilter({ state: '', category: '' })
+    setView('directory')
+  }
+
   const categories = [
     { label: 'Restaurants', value: 'Laotian restaurant', image: '/images/lao-restaurant.jpg' },
     { label: 'Nonprofits', value: 'nonprofit', image: '/images/lao-nonprofit.jpg' },
     { label: 'Services', value: 'service', image: '/images/lao-services.jpg' },
     { label: 'Retail', value: 'retail', image: '/images/lao-retail.webp' },
   ]
+
+  const cities = ['Houston', 'Minneapolis', 'Los Angeles', 'Dallas', 'Atlanta', 'Seattle']
 
   return (
     <main>
@@ -125,47 +134,41 @@ export default function Home() {
               </div>
             )}
 
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Category</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-              {categories.map(({ label, value, image }) => {
-                return (
-                  <button
-                    key={value}
-                    onClick={() => showDirectory(value)}
-                    className="relative rounded-2xl overflow-hidden h-40 group cursor-pointer"
-                  >
-                    <img src={image} alt={label} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-                    <div className="absolute inset-0 bg-black opacity-40 group-hover:opacity-30 transition" />
-                    <span className="absolute inset-0 flex items-end p-4 text-white font-bold text-lg">{label}</span>
-                  </button>
-                )
-              })}
- 
-<div className="mb-12">
-  <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by City</h2>
-  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-    {[
-      'Houston', 'Minneapolis', 'Los Angeles', 'Dallas', 'Atlanta', 'Seattle'
-    ].map((city) => (
-      <button
-        key={city}
-        onClick={() => {
-          setFilter({ state: '', category: '' })
-          setSearch(city)
-          setSearchInput(city)
-          setView('directory')
-        }}
-        className="text-left px-5 py-4 bg-white border border-gray-100 rounded-xl hover:shadow-md hover:border-gray-200 transition"
-      >
-        <span className="font-medium text-gray-900">{city}</span>
-      </button>
-    ))}
-  </div>
-</div>
+            <div className="mb-12">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Category</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {categories.map(({ label, value, image }) => {
+                  return (
+                    <button
+                      key={value}
+                      onClick={() => showDirectory(value)}
+                      className="relative rounded-2xl overflow-hidden h-40 group cursor-pointer"
+                    >
+                      <img src={image} alt={label} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                      <div className="absolute inset-0 bg-black opacity-40 group-hover:opacity-30 transition" />
+                      <span className="absolute inset-0 flex items-end p-4 text-white font-bold text-lg">{label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
 
-
-
-           </div>
+            <div className="mb-12">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by City</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {cities.map((city) => {
+                  return (
+                    <button
+                      key={city}
+                      onClick={() => showCity(city)}
+                      className="text-left px-5 py-4 bg-white border border-gray-100 rounded-xl hover:shadow-md hover:border-gray-200 transition"
+                    >
+                      <span className="font-medium text-gray-900">{city}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         ) : (
           <div>
