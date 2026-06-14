@@ -31,7 +31,7 @@ export default function BusinessPage() {
       {business.photo_url && (
         <div className="w-full h-64 overflow-hidden relative">
           <img
-            src={business.photo_url}
+src={business.photo_url ? business.photo_url.replace('w408', 'w1200') : ''}
             alt={business.name}
             className="w-full h-full object-cover"
           />
