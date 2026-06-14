@@ -5,11 +5,11 @@ import { supabase } from '../lib/supabase'
 
 export default function Home() {
   const [businesses, setBusinesses] = useState([])
+  const [featured, setFeatured] = useState([])
   const [filter, setFilter] = useState({ state: '', category: '' })
   const [search, setSearch] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const [view, setView] = useState('home')
-const [featured, setFeatured] = useState([])
 
   useEffect(() => {
     if (view !== 'home') {
@@ -17,18 +17,18 @@ const [featured, setFeatured] = useState([])
     }
   }, [filter, search, view])
 
-useEffect(() => {
-  fetchFeatured()
-}, [])
+  useEffect(() => {
+    fetchFeatured()
+  }, [])
 
-async function fetchFeatured() {
-  const { data } = await supabase
-    .from('businesses')
-    .select('*')
-    .eq('featured', true)
-    .eq('status', 'active')
-  if (data) setFeatured(data)
-}
+  async function fetchFeatured() {
+    const { data } = await supabase
+      .from('businesses')
+      .select('*')
+      .eq('featured', true)
+      .eq('status', 'active')
+    if (data) setFeatured(data)
+  }
 
   async function fetchBusinesses() {
     let query = supabase.from('businesses').select('*').eq('status', 'active')
@@ -49,10 +49,17 @@ async function fetchFeatured() {
     setView('directory')
   }
 
-  function showDirectory(category = '') {
-    setFilter({ state: '', category })
+  function showDirectory(category) {
+    setFilter({ state: '', category: category || '' })
     setView('directory')
   }
+
+  const categories = [
+    { label: 'Restaurants', value: 'Laotian restaurant', image: '/images/lao-restaurant.jpg' },
+    { label: 'Nonprofits', value: 'nonprofit', image: '/images/lao-nonprofit.jpg' },
+    { label: 'Services', value: 'service', image: '/images/lao-services.jpg' },
+    { label: 'Retail', value: 'retail', image: '/images/lao-retail.webp' },
+  ]
 
   return (
     <main>
@@ -82,49 +89,57 @@ async function fetchFeatured() {
       <div className="max-w-4xl mx-auto px-6 py-8">
         {view === 'home' ? (
           <div>
-{featured.length > 0 && (
-  <div className="mb-12">
-    <h2 className="text-xl font-bold text-gray-900 mb-6">Featured Businesses</h2>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {featured.map((biz) => (
-        <a
-          key={biz.id}
-          href={`/business/${biz.id}`}
-          className="bg-white border-2 rounded-xl p-5 block hover:shadow-md transition"
-          style={{ borderColor: '#2d5a3d' }}
-        >
-          <div className="flex items-start justify-between mb-2">
-            <span style={{ backgroundColor: '#2d5a3d', color: 'white' }} className="text-xs font-semibold px-3 py-1 rounded-full">
-              Featured
-            </span>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mt-2">{biz.name}</h3>
-          <p className="text-sm text-gray-500 mt-1">{biz.category} · {biz.city}, {biz.state}</p>
-          {biz.description && <p className="text-sm text-gray-600 mt-2">{biz.description}</p>}
-        </a>
-      ))}
-    </div>
-  </div>
-)}           
+            {featured.length > 0 && (
+              <div className="mb-12">
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Featured Businesses</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {featured.map((biz) => {
+                    return (
+                      <a
+                        key={biz.id}
+                        href={'/business/' + biz.id}
+                        className="bg-white rounded-xl overflow-hidden border border-gray-100 block hover:shadow-md transition"
+                      >
+                        <div className="h-40 overflow-hidden relative">
+                          <img
+                            src={biz.photo_url || '/images/lao-restaurant.jpg'}
+                            alt={biz.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black opacity-20" />
+                          <span style={{ backgroundColor: '#2d5a3d' }} className="absolute top-3 left-3 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                            Featured
+                          </span>
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-lg font-semibold text-gray-900">{biz.name}</h3>
+                          <p className="text-sm text-gray-500 mt-1">{biz.category} · {biz.city}, {biz.state}</p>
+                          {biz.description && (
+                            <p className="text-sm text-gray-600 mt-2">{biz.description}</p>
+                          )}
+                        </div>
+                      </a>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
 
- <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Category</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Category</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-              {[
-                { label: 'Restaurants', value: 'Laotian restaurant', image: '/images/lao-restaurant.jpg' },
-                { label: 'Nonprofits', value: 'nonprofit', image: '/images/lao-nonprofit.jpg' },
-                { label: 'Services', value: 'service', image: '/images/lao-services.jpg' },
-                { label: 'Retail', value: 'retail', image: '/images/lao-retail.webp' },
-              ].map(({ label, value, image }) => (
-                <button
-                  key={value}
-                  onClick={() => showDirectory(value)}
-                  className="relative rounded-2xl overflow-hidden h-40 group cursor-pointer"
-                >
-                  <img src={image} alt={label} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-                  <div className="absolute inset-0 bg-black opacity-40 group-hover:opacity-30 transition" />
-                  <span className="absolute inset-0 flex items-end p-4 text-white font-bold text-lg">{label}</span>
-                </button>
-              ))}
+              {categories.map(({ label, value, image }) => {
+                return (
+                  <button
+                    key={value}
+                    onClick={() => showDirectory(value)}
+                    className="relative rounded-2xl overflow-hidden h-40 group cursor-pointer"
+                  >
+                    <img src={image} alt={label} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                    <div className="absolute inset-0 bg-black opacity-40 group-hover:opacity-30 transition" />
+                    <span className="absolute inset-0 flex items-end p-4 text-white font-bold text-lg">{label}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
         ) : (
@@ -164,7 +179,7 @@ async function fetchFeatured() {
                 style={{ color: '#2d5a3d' }}
                 className="text-sm px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition"
               >
-               Back to Home
+                Back to Home
               </a>
 
               {search && (
@@ -181,26 +196,30 @@ async function fetchFeatured() {
             </div>
 
             <div className="grid gap-4">
-              {businesses.map((biz) => (
-                <a
-                  key={biz.id}
-                  href={`/business/${biz.id}`}
-                  className="bg-white border border-gray-100 rounded-xl p-5 block hover:shadow-md hover:border-gray-200 transition"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h2 className="text-lg font-semibold text-gray-900">{biz.name}</h2>
-                      <p className="text-sm text-gray-500 mt-1">{biz.category} · {biz.city}, {biz.state}</p>
-                      {biz.description && <p className="text-sm text-gray-600 mt-2">{biz.description}</p>}
+              {businesses.map((biz) => {
+                return (
+                  <a
+                    key={biz.id}
+                    href={'/business/' + biz.id}
+                    className="bg-white border border-gray-100 rounded-xl p-5 block hover:shadow-md hover:border-gray-200 transition"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h2 className="text-lg font-semibold text-gray-900">{biz.name}</h2>
+                        <p className="text-sm text-gray-500 mt-1">{biz.category} · {biz.city}, {biz.state}</p>
+                        {biz.description && (
+                          <p className="text-sm text-gray-600 mt-2">{biz.description}</p>
+                        )}
+                      </div>
+                      {biz.is_lao_owned && (
+                        <span style={{ backgroundColor: '#f0f9f4', color: '#2d5a3d' }} className="text-xs font-semibold px-3 py-1 rounded-full ml-4 whitespace-nowrap">
+                          Lao Owned
+                        </span>
+                      )}
                     </div>
-                    {biz.is_lao_owned && (
-                      <span style={{ backgroundColor: '#f0f9f4', color: '#2d5a3d' }} className="text-xs font-semibold px-3 py-1 rounded-full ml-4 whitespace-nowrap">
-                        Lao Owned
-                      </span>
-                    )}
-                  </div>
-                </a>
-              ))}
+                  </a>
+                )
+              })}
               {businesses.length === 0 && (
                 <p className="text-gray-400 text-center py-12">No businesses found.</p>
               )}
