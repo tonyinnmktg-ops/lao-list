@@ -125,6 +125,22 @@ export default function Home() {
               </div>
             )}
 
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Category</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+              {categories.map(({ label, value, image }) => {
+                return (
+                  <button
+                    key={value}
+                    onClick={() => showDirectory(value)}
+                    className="relative rounded-2xl overflow-hidden h-40 group cursor-pointer"
+                  >
+                    <img src={image} alt={label} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                    <div className="absolute inset-0 bg-black opacity-40 group-hover:opacity-30 transition" />
+                    <span className="absolute inset-0 flex items-end p-4 text-white font-bold text-lg">{label}</span>
+                  </button>
+                )
+              })}
+ 
 <div className="mb-12">
   <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by City</h2>
   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -147,22 +163,9 @@ export default function Home() {
   </div>
 </div>
 
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Category</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-              {categories.map(({ label, value, image }) => {
-                return (
-                  <button
-                    key={value}
-                    onClick={() => showDirectory(value)}
-                    className="relative rounded-2xl overflow-hidden h-40 group cursor-pointer"
-                  >
-                    <img src={image} alt={label} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-                    <div className="absolute inset-0 bg-black opacity-40 group-hover:opacity-30 transition" />
-                    <span className="absolute inset-0 flex items-end p-4 text-white font-bold text-lg">{label}</span>
-                  </button>
-                )
-              })}
-            </div>
+
+
+           </div>
           </div>
         ) : (
           <div>
