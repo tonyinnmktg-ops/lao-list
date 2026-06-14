@@ -9,12 +9,26 @@ export default function Home() {
   const [search, setSearch] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const [view, setView] = useState('home')
+const [featured, setFeatured] = useState([])
 
   useEffect(() => {
     if (view !== 'home') {
       fetchBusinesses()
     }
   }, [filter, search, view])
+
+useEffect(() => {
+  fetchFeatured()
+}, [])
+
+async function fetchFeatured() {
+  const { data } = await supabase
+    .from('businesses')
+    .select('*')
+    .eq('featured', true)
+    .eq('status', 'active')
+  if (data) setFeatured(data)
+}
 
   async function fetchBusinesses() {
     let query = supabase.from('businesses').select('*').eq('status', 'active')
@@ -68,7 +82,32 @@ export default function Home() {
       <div className="max-w-4xl mx-auto px-6 py-8">
         {view === 'home' ? (
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Category</h2>
+{featured.length > 0 && (
+  <div className="mb-12">
+    <h2 className="text-xl font-bold text-gray-900 mb-6">Featured Businesses</h2>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {featured.map((biz) => (
+        <a
+          key={biz.id}
+          href={`/business/${biz.id}`}
+          className="bg-white border-2 rounded-xl p-5 block hover:shadow-md transition"
+          style={{ borderColor: '#2d5a3d' }}
+        >
+          <div className="flex items-start justify-between mb-2">
+            <span style={{ backgroundColor: '#2d5a3d', color: 'white' }} className="text-xs font-semibold px-3 py-1 rounded-full">
+              Featured
+            </span>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mt-2">{biz.name}</h3>
+          <p className="text-sm text-gray-500 mt-1">{biz.category} · {biz.city}, {biz.state}</p>
+          {biz.description && <p className="text-sm text-gray-600 mt-2">{biz.description}</p>}
+        </a>
+      ))}
+    </div>
+  </div>
+)}           
+
+ <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Category</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
               {[
                 { label: 'Restaurants', value: 'Laotian restaurant', image: '/images/lao-restaurant.jpg' },
