@@ -5,9 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../lib/supabase'
 import { CATEGORIES, categoryHref } from '../lib/categories'
 import BusinessCard from './components/BusinessCard'
+import { METROS, getMetro, inMetro, cityKey } from '../lib/metros'
 
 const GREEN = '#2d5a3d'
-const cities = ['Houston', 'Minneapolis', 'Los Angeles', 'Dallas', 'Atlanta', 'Seattle']
 
 export default function Home() {
   return (
@@ -24,11 +24,15 @@ function HomeInner() {
   const state = params.get('state') || ''
   const q = params.get('q') || ''
   const subs = params.getAll('sub')
-  const isDirectory = Boolean(category || state || q)
+  const metroSlug = params.get('metro') || ''
+  const metro = getMetro(metroSlug)
+  const city = params.get('city') || ''
+  const isDirectory = Boolean(category || state || q || metro || city || subs.length)
 
   const [searchInput, setSearchInput] = useState(q)
   const [featured, setFeatured] = useState([])
   const [counts, setCounts] = useState({})
+  const [metroCounts, setMetroCounts] = useState({})
   const [states, setStates] = useState([])
   const [businesses, setBusinesses] = useState([])
   const [loading, setLoading] = useState(false)
@@ -41,7 +45,7 @@ function HomeInner() {
     fetchFeatured()
     supabase
       .from('businesses')
-      .select('category, state')
+      .select('category, state, city')
       .eq('status', 'active')
       .then(({ data }) => {
         if (!data) return
@@ -53,12 +57,15 @@ function HomeInner() {
         })
         setCounts(c)
         setStates([...s].sort())
+        const m = {}
+        METROS.forEach((mt) => { m[mt.slug] = data.filter((b) => inMetro(mt, b)).length })
+        setMetroCounts(m)
       })
   }, [])
 
   useEffect(() => {
     if (isDirectory) fetchBusinesses()
-  }, [category, state, q])
+  }, [category, state, q, metroSlug])
 
   async function fetchFeatured() {
     // Businesses marked featured first; top up to 3 with highest-rated businesses that have photos
@@ -102,16 +109,22 @@ function HomeInner() {
     }
     if (state) query = query.eq('state', state)
     if (category) query = query.eq('category', category)
+    if (metro) {
+      query = query
+        .in('city', [...new Set(metro.places.map((p) => p[0]))])
+        .in('state', [...new Set(metro.places.map((p) => p[1]))])
+    }
     const { data } = await query
       .order('photo_url', { ascending: true, nullsFirst: false })
       .order('rating', { ascending: false, nullsFirst: false })
-    setBusinesses(data || [])
+    // Metro query matches city and state separately; keep only exact city+state pairs
+    setBusinesses(metro ? (data || []).filter((b) => inMetro(metro, b)) : data || [])
     setLoading(false)
   }
 
   function go(next) {
     const p = new URLSearchParams()
-    const merged = { category, state, q, sub: subs, ...next }
+    const merged = { category, state, metro: metroSlug, city, q, sub: subs, ...next }
     Object.entries(merged).forEach(([k, v]) => {
       if (Array.isArray(v)) v.forEach((x) => p.append(k, x))
       else if (v) p.set(k, v)
@@ -122,26 +135,41 @@ function HomeInner() {
 
   function handleSearch(e) {
     e.preventDefault()
-    go({ q: searchInput.trim(), category: '', state: '', sub: [] })
+    go({ q: searchInput.trim(), category: '', state: '', metro: '', city: '', sub: [] })
   }
 
-  // Subcategory chips: counts come from the current category/state/search results
+  // Faceted filtering on the loaded results: city and subcategory each narrow the other's counts
+  const matchCity = (b) => !city || cityKey(b) === city
+  const matchSubs = (b) => !subs.length || subs.includes(b.subcategory)
+
   const subCounts = {}
-  businesses.forEach((b) => {
+  businesses.filter(matchCity).forEach((b) => {
     if (b.subcategory) subCounts[b.subcategory] = (subCounts[b.subcategory] || 0) + 1
   })
   const subList = Object.entries(subCounts).sort((a, b) => b[1] - a[1])
   subs.forEach((s) => { if (!subCounts[s]) subList.push([s, 0]) })
-  const visible = subs.length ? businesses.filter((b) => subs.includes(b.subcategory)) : businesses
+
+  const cityCounts = {}
+  businesses.filter(matchSubs).forEach((b) => {
+    if (b.city) cityCounts[cityKey(b)] = (cityCounts[cityKey(b)] || 0) + 1
+  })
+  const cityList = Object.entries(cityCounts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  if (city && !cityCounts[city]) cityList.unshift([city, 0])
+  // Show "City" alone when every result is in one state
+  const oneState = state || (businesses.length && businesses.every((b) => b.state === businesses[0].state))
+  const cityLabel = (key) => (oneState ? key.split(', ')[0] : key)
+
+  const visible = businesses.filter((b) => matchCity(b) && matchSubs(b))
 
   function toggleSub(name) {
     go({ sub: subs.includes(name) ? subs.filter((s) => s !== name) : [...subs, name] })
   }
-  const activeFilterCount = (category ? 1 : 0) + (state ? 1 : 0) + subs.length
+  const activeFilterCount =
+    (category ? 1 : 0) + (state ? 1 : 0) + (metro ? 1 : 0) + (city ? 1 : 0) + subs.length
 
   const heading = [
-    (subs.length && subs.length <= 2 ? subs.join(' & ') : '') || category || (q ? `Results for “${q}”` : 'All businesses'),
-    state ? `in ${state}` : '',
+    (subs.length && subs.length <= 2 ? subs.join(' & ') : '') || category || (q ? `Results for “${q}”` : 'Lao businesses'),
+    city ? `in ${city.split(', ')[0]}` : metro ? `in ${metro.label}` : state ? `in ${state}` : '',
   ]
     .filter(Boolean)
     .join(' ')
@@ -215,15 +243,19 @@ function HomeInner() {
             </section>
 
             <section className="mb-12">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by City</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {cities.map((city) => (
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Metro Area</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {METROS.map((m) => (
                   <a
-                    key={city}
-                    href={'/?q=' + encodeURIComponent(city)}
-                    className="text-left px-5 py-4 bg-white border border-gray-100 rounded-xl hover:shadow-md hover:border-gray-200 transition block"
+                    key={m.slug}
+                    href={'/?metro=' + m.slug}
+                    className="px-5 py-4 bg-white border border-gray-100 rounded-xl hover:shadow-md hover:border-gray-200 transition block"
                   >
-                    <span className="font-medium text-gray-900">{city}</span>
+                    <span className="block font-medium text-gray-900">{m.label}</span>
+                    <span className="block text-xs text-gray-500 mt-1">
+                      {m.region}
+                      {metroCounts[m.slug] ? ` · ${metroCounts[m.slug]} listings` : ''}
+                    </span>
                   </a>
                 ))}
               </div>
@@ -309,22 +341,53 @@ function HomeInner() {
                   </FilterGroup>
                 )}
 
-                <FilterGroup title="State">
-                  <select
-                    value={state}
-                    onChange={(e) => go({ state: e.target.value })}
-                    className="w-full border border-gray-200 bg-white px-3 py-2 rounded-lg text-sm focus:outline-none"
-                  >
-                    <option value="">All states</option>
-                    {states.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
+                <FilterGroup title="Location">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs text-gray-500">
+                      Metro area
+                      <select
+                        value={metroSlug}
+                        onChange={(e) => go({ metro: e.target.value, state: '', city: '' })}
+                        className="w-full border border-gray-200 bg-white px-3 py-2 rounded-lg text-sm focus:outline-none mt-1"
+                      >
+                        <option value="">All metro areas</option>
+                        {METROS.map((m) => (
+                          <option key={m.slug} value={m.slug}>{m.label}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="text-xs text-gray-500">
+                      State
+                      <select
+                        value={state}
+                        onChange={(e) => go({ state: e.target.value, metro: '', city: '' })}
+                        className="w-full border border-gray-200 bg-white px-3 py-2 rounded-lg text-sm focus:outline-none mt-1"
+                      >
+                        <option value="">All states</option>
+                        {states.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="text-xs text-gray-500">
+                      City
+                      <select
+                        value={city}
+                        onChange={(e) => go({ city: e.target.value })}
+                        className="w-full border border-gray-200 bg-white px-3 py-2 rounded-lg text-sm focus:outline-none mt-1"
+                      >
+                        <option value="">All cities</option>
+                        {cityList.map(([key, n]) => (
+                          <option key={key} value={key}>{cityLabel(key)} ({n})</option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
                 </FilterGroup>
 
                 {activeFilterCount > 0 && (
                   <button
-                    onClick={() => go({ category: '', state: '', sub: [], q: q })}
+                    onClick={() => go({ category: '', state: '', metro: '', city: '', sub: [], q: q })}
                     className="w-full text-sm py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition mt-1"
                     style={{ color: GREEN }}
                   >
