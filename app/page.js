@@ -23,7 +23,7 @@ function HomeInner() {
   const category = params.get('category') || ''
   const state = params.get('state') || ''
   const q = params.get('q') || ''
-  const sub = params.get('sub') || ''
+  const subs = params.getAll('sub')
   const isDirectory = Boolean(category || state || q)
 
   const [searchInput, setSearchInput] = useState(q)
@@ -32,6 +32,7 @@ function HomeInner() {
   const [states, setStates] = useState([])
   const [businesses, setBusinesses] = useState([])
   const [loading, setLoading] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   useEffect(() => setSearchInput(q), [q])
 
@@ -110,15 +111,18 @@ function HomeInner() {
 
   function go(next) {
     const p = new URLSearchParams()
-    const merged = { category, state, q, sub, ...next }
-    Object.entries(merged).forEach(([k, v]) => v && p.set(k, v))
+    const merged = { category, state, q, sub: subs, ...next }
+    Object.entries(merged).forEach(([k, v]) => {
+      if (Array.isArray(v)) v.forEach((x) => p.append(k, x))
+      else if (v) p.set(k, v)
+    })
     const qs = p.toString()
     router.push(qs ? '/?' + qs : '/')
   }
 
   function handleSearch(e) {
     e.preventDefault()
-    go({ q: searchInput.trim(), category: '', state: '', sub: '' })
+    go({ q: searchInput.trim(), category: '', state: '', sub: [] })
   }
 
   // Subcategory chips: counts come from the current category/state/search results
@@ -127,11 +131,16 @@ function HomeInner() {
     if (b.subcategory) subCounts[b.subcategory] = (subCounts[b.subcategory] || 0) + 1
   })
   const subList = Object.entries(subCounts).sort((a, b) => b[1] - a[1])
-  if (sub && !subCounts[sub]) subList.push([sub, 0])
-  const visible = sub ? businesses.filter((b) => b.subcategory === sub) : businesses
+  subs.forEach((s) => { if (!subCounts[s]) subList.push([s, 0]) })
+  const visible = subs.length ? businesses.filter((b) => subs.includes(b.subcategory)) : businesses
+
+  function toggleSub(name) {
+    go({ sub: subs.includes(name) ? subs.filter((s) => s !== name) : [...subs, name] })
+  }
+  const activeFilterCount = (category ? 1 : 0) + (state ? 1 : 0) + subs.length
 
   const heading = [
-    sub || category || (q ? `Results for “${q}”` : 'All businesses'),
+    (subs.length && subs.length <= 2 ? subs.join(' & ') : '') || category || (q ? `Results for “${q}”` : 'All businesses'),
     state ? `in ${state}` : '',
   ]
     .filter(Boolean)
@@ -162,7 +171,7 @@ function HomeInner() {
         </form>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className={(isDirectory ? "max-w-6xl" : "max-w-5xl") + " mx-auto px-6 py-8"}>
         {!isDirectory ? (
           <div>
             {featured.length > 0 && (
@@ -225,68 +234,119 @@ function HomeInner() {
             <a href="/" className="text-sm font-medium inline-flex items-center gap-1 mb-4" style={{ color: GREEN }}>
               <span aria-hidden>←</span> Back to Home
             </a>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">{heading}</h2>
-
-            <div className="flex gap-3 mb-8 flex-wrap items-center">
-              <select
-                value={category}
-                onChange={(e) => go({ category: e.target.value, sub: '' })}
-                className="border border-gray-200 bg-white px-4 py-2 rounded-full text-sm font-medium focus:outline-none"
+            <div className="flex items-end justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">{heading}</h2>
+                {!loading && <p className="text-sm text-gray-500 mt-1">{visible.length} listings</p>}
+              </div>
+              <button
+                onClick={() => setFiltersOpen((o) => !o)}
+                className="md:hidden text-sm px-4 py-2 rounded-full border border-gray-200 bg-white font-medium"
+                style={{ color: GREEN }}
               >
-                <option value="">All Categories</option>
-                {CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
-                ))}
-              </select>
-
-              <select
-                value={state}
-                onChange={(e) => go({ state: e.target.value })}
-                className="border border-gray-200 bg-white px-4 py-2 rounded-full text-sm font-medium focus:outline-none"
-              >
-                <option value="">All States</option>
-                {states.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-
-              {q && (
-                <button
-                  onClick={() => go({ q: '' })}
-                  className="text-sm px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition"
-                  style={{ color: GREEN }}
-                >
-                  Clear search
-                </button>
-              )}
-
-              {!loading && <span className="text-sm text-gray-400">{visible.length} listings</span>}
+                Filters{activeFilterCount ? ` (${activeFilterCount})` : ''}
+              </button>
             </div>
 
-            {!loading && subList.length > 1 && (
-              <div className="flex gap-2 mb-6 overflow-x-auto pb-1 -mx-1 px-1">
-                <Chip active={!sub} onClick={() => go({ sub: '' })}>
-                  All <span className="opacity-60">{businesses.length}</span>
-                </Chip>
-                {subList.map(([name, n]) => (
-                  <Chip key={name} active={sub === name} onClick={() => go({ sub: name })}>
-                    {name} <span className="opacity-60">{n}</span>
-                  </Chip>
-                ))}
-              </div>
-            )}
+            <div className="md:grid md:grid-cols-[230px_1fr] md:gap-8 items-start">
+              <aside
+                className={(filtersOpen ? 'block' : 'hidden') + ' md:block mb-6 md:mb-0 bg-white border border-gray-100 rounded-xl p-5 md:sticky md:top-4'}
+              >
+                {q && (
+                  <FilterGroup title="Search">
+                    <div className="flex items-center justify-between gap-2 text-sm">
+                      <span className="text-gray-700 truncate">“{q}”</span>
+                      <button onClick={() => go({ q: '' })} className="text-xs font-medium shrink-0" style={{ color: GREEN }}>
+                        Clear
+                      </button>
+                    </div>
+                  </FilterGroup>
+                )}
 
-            {loading ? (
-              <p className="text-gray-400 text-center py-12">Loading...</p>
-            ) : visible.length === 0 ? (
-              <p className="text-gray-400 text-center py-12">No businesses found.</p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {visible.map((biz) => (
-                  <BusinessCard key={biz.id} biz={biz} />
-                ))}
+                <FilterGroup title="Category">
+                  <div className="flex flex-col gap-1">
+                    {[{ label: 'All categories', value: '' }, ...CATEGORIES].map((c) => (
+                      <label key={c.value || 'all'} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer py-0.5">
+                        <input
+                          type="radio"
+                          name="category"
+                          checked={category === c.value}
+                          onChange={() => go({ category: c.value, sub: [] })}
+                          style={{ accentColor: GREEN }}
+                        />
+                        <span className="flex-1">{c.label}</span>
+                        {c.value && counts[c.value] != null && (
+                          <span className="text-xs text-gray-400">{counts[c.value]}</span>
+                        )}
+                      </label>
+                    ))}
+                  </div>
+                </FilterGroup>
+
+                {subList.length > 0 && (
+                  <FilterGroup
+                    title="Subcategory"
+                    action={subs.length > 0 && (
+                      <button onClick={() => go({ sub: [] })} className="text-xs font-medium" style={{ color: GREEN }}>
+                        Clear
+                      </button>
+                    )}
+                  >
+                    <div className="flex flex-col gap-1">
+                      {subList.map(([name, n]) => (
+                        <label key={name} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer py-0.5">
+                          <input
+                            type="checkbox"
+                            checked={subs.includes(name)}
+                            onChange={() => toggleSub(name)}
+                            style={{ accentColor: GREEN }}
+                          />
+                          <span className="flex-1">{name}</span>
+                          <span className="text-xs text-gray-400">{n}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </FilterGroup>
+                )}
+
+                <FilterGroup title="State">
+                  <select
+                    value={state}
+                    onChange={(e) => go({ state: e.target.value })}
+                    className="w-full border border-gray-200 bg-white px-3 py-2 rounded-lg text-sm focus:outline-none"
+                  >
+                    <option value="">All states</option>
+                    {states.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </FilterGroup>
+
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={() => go({ category: '', state: '', sub: [], q: q })}
+                    className="w-full text-sm py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition mt-1"
+                    style={{ color: GREEN }}
+                  >
+                    Reset filters
+                  </button>
+                )}
+              </aside>
+
+              <div>
+                {loading ? (
+                  <p className="text-gray-400 text-center py-12">Loading...</p>
+                ) : visible.length === 0 ? (
+                  <p className="text-gray-400 text-center py-12">No businesses found.</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {visible.map((biz) => (
+                      <BusinessCard key={biz.id} biz={biz} />
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         )}
       </div>
@@ -294,18 +354,14 @@ function HomeInner() {
   )
 }
 
-function Chip({ active, onClick, children }) {
+function FilterGroup({ title, action, children }) {
   return (
-    <button
-      onClick={onClick}
-      className="text-sm px-4 py-2 rounded-full border whitespace-nowrap transition shrink-0"
-      style={
-        active
-          ? { backgroundColor: GREEN, borderColor: GREEN, color: '#fff' }
-          : { backgroundColor: '#fff', borderColor: '#e5e7eb', color: '#374151' }
-      }
-    >
+    <div className="mb-5 last:mb-0">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">{title}</h3>
+        {action}
+      </div>
       {children}
-    </button>
+    </div>
   )
 }

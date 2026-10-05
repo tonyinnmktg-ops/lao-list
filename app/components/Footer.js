@@ -15,11 +15,11 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-3 text-sm uppercase tracking-wide opacity-70">Browse</h3>
           <ul className="flex flex-col gap-2 text-sm opacity-80">
-            <li><Link href="/?category=restaurant" className="hover:opacity-100">Restaurants</Link></li>
-            <li><Link href="/?category=nonprofit" className="hover:opacity-100">Nonprofits</Link></li>
-            <li><Link href="/?category=service" className="hover:opacity-100">Services</Link></li>
-            <li><Link href="/?category=retail" className="hover:opacity-100">Retail</Link></li>
-            <li><Link href="/?category=other" className="hover:opacity-100">Other</Link></li>
+            <li><Link href="/?category=Food%20%26%20Beverage" className="hover:opacity-100">Food &amp; Beverage</Link></li>
+            <li><Link href="/?category=Community%20%26%20Faith" className="hover:opacity-100">Community &amp; Faith</Link></li>
+            <li><Link href="/?category=Retail" className="hover:opacity-100">Retail</Link></li>
+            <li><Link href="/?category=Services" className="hover:opacity-100">Services</Link></li>
+            <li><Link href="/?category=Technology%20%26%20Media" className="hover:opacity-100">Technology &amp; Media</Link></li>
           </ul>
         </div>
 
