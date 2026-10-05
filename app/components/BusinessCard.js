@@ -22,6 +22,14 @@ export default function BusinessCard({ biz, badge }) {
         )}
       </div>
       <div className="p-4">
+        {biz.subcategory && (
+          <span
+            className="inline-block text-xs font-medium px-2 py-0.5 rounded-full mb-2"
+            style={{ backgroundColor: '#f0f9f4', color: GREEN }}
+          >
+            {biz.subcategory}
+          </span>
+        )}
         <h3 className="text-base font-semibold text-gray-900">{biz.name}</h3>
         <p className="text-sm text-gray-500 mt-1">
           {biz.category} · {[biz.city, biz.state].filter(Boolean).join(', ')}

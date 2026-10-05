@@ -23,6 +23,7 @@ function HomeInner() {
   const category = params.get('category') || ''
   const state = params.get('state') || ''
   const q = params.get('q') || ''
+  const sub = params.get('sub') || ''
   const isDirectory = Boolean(category || state || q)
 
   const [searchInput, setSearchInput] = useState(q)
@@ -95,7 +96,7 @@ function HomeInner() {
     let query = supabase.from('businesses').select('*').eq('status', 'active')
     if (q) {
       query = query.or(
-        `name.ilike.%${q}%,city.ilike.%${q}%,category.ilike.%${q}%,description.ilike.%${q}%`
+        `name.ilike.%${q}%,city.ilike.%${q}%,category.ilike.%${q}%,subcategory.ilike.%${q}%,description.ilike.%${q}%`
       )
     }
     if (state) query = query.eq('state', state)
@@ -109,7 +110,7 @@ function HomeInner() {
 
   function go(next) {
     const p = new URLSearchParams()
-    const merged = { category, state, q, ...next }
+    const merged = { category, state, q, sub, ...next }
     Object.entries(merged).forEach(([k, v]) => v && p.set(k, v))
     const qs = p.toString()
     router.push(qs ? '/?' + qs : '/')
@@ -117,11 +118,20 @@ function HomeInner() {
 
   function handleSearch(e) {
     e.preventDefault()
-    go({ q: searchInput.trim(), category: '', state: '' })
+    go({ q: searchInput.trim(), category: '', state: '', sub: '' })
   }
 
+  // Subcategory chips: counts come from the current category/state/search results
+  const subCounts = {}
+  businesses.forEach((b) => {
+    if (b.subcategory) subCounts[b.subcategory] = (subCounts[b.subcategory] || 0) + 1
+  })
+  const subList = Object.entries(subCounts).sort((a, b) => b[1] - a[1])
+  if (sub && !subCounts[sub]) subList.push([sub, 0])
+  const visible = sub ? businesses.filter((b) => b.subcategory === sub) : businesses
+
   const heading = [
-    category || (q ? `Results for “${q}”` : 'All businesses'),
+    sub || category || (q ? `Results for “${q}”` : 'All businesses'),
     state ? `in ${state}` : '',
   ]
     .filter(Boolean)
@@ -220,7 +230,7 @@ function HomeInner() {
             <div className="flex gap-3 mb-8 flex-wrap items-center">
               <select
                 value={category}
-                onChange={(e) => go({ category: e.target.value })}
+                onChange={(e) => go({ category: e.target.value, sub: '' })}
                 className="border border-gray-200 bg-white px-4 py-2 rounded-full text-sm font-medium focus:outline-none"
               >
                 <option value="">All Categories</option>
@@ -250,16 +260,29 @@ function HomeInner() {
                 </button>
               )}
 
-              {!loading && <span className="text-sm text-gray-400">{businesses.length} listings</span>}
+              {!loading && <span className="text-sm text-gray-400">{visible.length} listings</span>}
             </div>
+
+            {!loading && subList.length > 1 && (
+              <div className="flex gap-2 mb-6 overflow-x-auto pb-1 -mx-1 px-1">
+                <Chip active={!sub} onClick={() => go({ sub: '' })}>
+                  All <span className="opacity-60">{businesses.length}</span>
+                </Chip>
+                {subList.map(([name, n]) => (
+                  <Chip key={name} active={sub === name} onClick={() => go({ sub: name })}>
+                    {name} <span className="opacity-60">{n}</span>
+                  </Chip>
+                ))}
+              </div>
+            )}
 
             {loading ? (
               <p className="text-gray-400 text-center py-12">Loading...</p>
-            ) : businesses.length === 0 ? (
+            ) : visible.length === 0 ? (
               <p className="text-gray-400 text-center py-12">No businesses found.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {businesses.map((biz) => (
+                {visible.map((biz) => (
                   <BusinessCard key={biz.id} biz={biz} />
                 ))}
               </div>
@@ -268,5 +291,21 @@ function HomeInner() {
         )}
       </div>
     </main>
+  )
+}
+
+function Chip({ active, onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      className="text-sm px-4 py-2 rounded-full border whitespace-nowrap transition shrink-0"
+      style={
+        active
+          ? { backgroundColor: GREEN, borderColor: GREEN, color: '#fff' }
+          : { backgroundColor: '#fff', borderColor: '#e5e7eb', color: '#374151' }
+      }
+    >
+      {children}
+    </button>
   )
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
-import { categoryHref, stateHref } from '../../../lib/categories'
+import { categoryHref, stateHref, subcategoryHref } from '../../../lib/categories'
 import BusinessCard from '../../components/BusinessCard'
 
 const GREEN = '#2d5a3d'
@@ -40,18 +40,23 @@ export default function BusinessPage() {
         .order('rating', { ascending: false, nullsFirst: false })
 
     // 1. Same category, same state. Fall back to same category anywhere if the state is thin.
+    // Pull a wider pool, then put same-subcategory matches first
+    const rank = (list) =>
+      [...list]
+        .sort((a, b) => (b.subcategory === biz.subcategory) - (a.subcategory === biz.subcategory))
+        .slice(0, 6)
     let same = []
     if (biz.state) {
-      const { data } = await base().eq('category', biz.category).eq('state', biz.state).limit(6)
+      const { data } = await base().eq('category', biz.category).eq('state', biz.state).limit(30)
       same = data || []
     }
     if (same.length < 3) {
-      const { data } = await base().eq('category', biz.category).limit(6)
+      const { data } = await base().eq('category', biz.category).limit(30)
       setNearbyScope('national')
-      setNearby(data || [])
+      setNearby(rank(data || []))
     } else {
       setNearbyScope('state')
-      setNearby(same)
+      setNearby(rank(same))
     }
 
     // 2. Other categories in the same state
@@ -108,6 +113,22 @@ export default function BusinessPage() {
                 {business.category} · {[business.city, business.state].filter(Boolean).join(', ')}
                 {business.rating && <> · ★ {business.rating}</>}
               </p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {business.category && (
+                  <a href={categoryHref(business.category)} className="text-xs font-medium px-3 py-1 rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50">
+                    {business.category}
+                  </a>
+                )}
+                {business.subcategory && (
+                  <a
+                    href={subcategoryHref(business.category, business.subcategory)}
+                    className="text-xs font-medium px-3 py-1 rounded-full hover:opacity-80"
+                    style={{ backgroundColor: '#f0f9f4', color: GREEN }}
+                  >
+                    {business.subcategory}
+                  </a>
+                )}
+              </div>
             </div>
             {business.is_lao_owned && (
               <span style={{ backgroundColor: '#f0f9f4', color: GREEN }} className="text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap shrink-0">
