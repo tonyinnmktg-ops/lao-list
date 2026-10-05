@@ -16,7 +16,7 @@ export default function BusinessCard({ biz, badge }) {
         />
         <div className="absolute inset-0 bg-black opacity-20" />
         {badge && (
-          <span style={{ backgroundColor: GREEN }} className="absolute top-3 left-3 text-white text-xs font-semibold px-3 py-1 rounded-full">
+          <span className="absolute top-3 left-3 bg-gold text-gold-ink text-xs font-semibold px-3 py-1 rounded-full">
             {badge}
           </span>
         )}
@@ -24,8 +24,7 @@ export default function BusinessCard({ biz, badge }) {
       <div className="p-4">
         {biz.subcategory && (
           <span
-            className="inline-block text-xs font-medium px-2 py-0.5 rounded-full mb-2"
-            style={{ backgroundColor: '#f0f9f4', color: GREEN }}
+            className="inline-block text-xs font-medium px-2 py-0.5 rounded-full mb-2 bg-teal-tint text-teal-ink"
           >
             {biz.subcategory}
           </span>
@@ -34,7 +33,7 @@ export default function BusinessCard({ biz, badge }) {
         <p className="text-sm text-gray-500 mt-1">
           {biz.category} · {[biz.city, biz.state].filter(Boolean).join(', ')}
         </p>
-        {biz.rating && <p className="text-sm text-gray-600 mt-1">★ {biz.rating}</p>}
+        {biz.rating && <p className="text-sm text-gray-600 mt-1"><span className="text-gold">★</span> {biz.rating}</p>}
         {biz.description && (
           <p className="text-sm text-gray-600 mt-2 line-clamp-2">{biz.description}</p>
         )}

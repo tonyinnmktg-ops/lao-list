@@ -195,7 +195,7 @@ function HomeInner() {
         <div className="relative">
         <h1 className="text-[clamp(2.25rem,9.5vw,4.5rem)] font-semibold text-white leading-[1.05] tracking-tight max-w-4xl mx-auto mb-5">
           <span className="block">Lao owned.</span>
-          <span className="block">Community grown.</span>
+          <span className="block">Community <span className="text-gold">grown.</span></span>
         </h1>
         <p className="text-white/80 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-10">
           From family kitchens to neighborhood markets, find Lao businesses across America. Made by the community, for the community.
@@ -223,7 +223,7 @@ function HomeInner() {
         {!isDirectory ? (
           <div>
             {featured.length > 0 && (
-              <Panel from="#f6f6f3" to="#efefeb" z={1}>
+              <Panel from="#fbf3e4" to="#f5ead6" z={1}>
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10">Featured Businesses</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {featured.map((biz) => (
@@ -233,7 +233,7 @@ function HomeInner() {
               </Panel>
             )}
 
-            <Panel from="#ffffff" to="#f7f7f4" z={2}>
+            <Panel from="#ffffff" to="#fdf9f2" z={2}>
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10">Browse by Category</h2>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {CATEGORIES.map(({ label, value, image }) => (
@@ -262,7 +262,7 @@ function HomeInner() {
               </div>
             </Panel>
 
-            <Panel from="#f3f3f0" to="#ebebe7" z={3}>
+            <Panel from="#f8eedc" to="#f1e5cd" z={3}>
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10">Browse by Metro Area</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {METROS.map((m) => (
@@ -281,7 +281,7 @@ function HomeInner() {
               </div>
             </Panel>
 
-            <Panel from="#ffffff" to="#f9f9f7" z={4}>
+            <Panel from="#ffffff" to="#fcf8f0" z={4}>
               <FAQSection />
             </Panel>
           </div>

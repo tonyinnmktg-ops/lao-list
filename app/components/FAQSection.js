@@ -107,7 +107,7 @@ export default function FAQSection() {
             aria-selected={tab === i}
             onClick={() => { setTab(i); setOpen(null) }}
             className="pb-3 text-base whitespace-nowrap border-b-2 -mb-px transition"
-            style={tab === i ? { color: GREEN, borderColor: GREEN, fontWeight: 600 } : { color: '#6b7280', borderColor: 'transparent' }}
+            style={tab === i ? { color: '#1a1a1a', borderColor: 'var(--color-saffron)', fontWeight: 600 } : { color: '#6b7280', borderColor: 'transparent' }}
           >
             {t.label}
           </button>

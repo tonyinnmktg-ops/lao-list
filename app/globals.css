@@ -6,10 +6,27 @@
   --font-display: var(--font-heading), ui-serif, Georgia, serif;
 }
 
+/* LaoList palette. Green and cream lead; accents each carry one meaning:
+   gold = featured / primary action, maroon = Lao-owned, teal = subcategory tags, saffron = active state */
+@theme {
+  --color-leaf: #2d5a3d;
+  --color-leaf-tint: #eaf3ec;
+  --color-gold: #d9a23b;
+  --color-gold-ink: #3d2a06;
+  --color-maroon: #8a2432;
+  --color-maroon-tint: #f7e4e6;
+  --color-maroon-ink: #6b1a25;
+  --color-teal: #2f8f8a;
+  --color-teal-tint: #e3f1ef;
+  --color-teal-ink: #1d5c58;
+  --color-saffron: #e07a2e;
+  --color-cream: #fbf3e4;
+}
+
 /* In the base layer so Tailwind utility classes (e.g. text-white on links) can override these */
 @layer base {
   body {
-    background-color: #f9f9f7;
+    background-color: #fcf8f0;
     color: #1a1a1a;
     font-family: var(--font-body), -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;

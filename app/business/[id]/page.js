@@ -116,7 +116,7 @@ export default function BusinessPage() {
               <h1 className="text-2xl font-bold text-gray-900">{business.name}</h1>
               <p className="text-gray-500 mt-1 text-sm">
                 {business.category} · {[business.city, business.state].filter(Boolean).join(', ')}
-                {business.rating && <> · ★ {business.rating}</>}
+                {business.rating && <> · <span className="text-gold">★</span> {business.rating}</>}
               </p>
               <div className="flex flex-wrap gap-2 mt-3">
                 {business.category && (
@@ -127,8 +127,7 @@ export default function BusinessPage() {
                 {business.subcategory && (
                   <a
                     href={subcategoryHref(business.category, business.subcategory)}
-                    className="text-xs font-medium px-3 py-1 rounded-full hover:opacity-80"
-                    style={{ backgroundColor: '#f0f9f4', color: GREEN }}
+                    className="text-xs font-medium px-3 py-1 rounded-full hover:opacity-80 bg-teal-tint text-teal-ink"
                   >
                     {business.subcategory}
                   </a>
@@ -136,7 +135,7 @@ export default function BusinessPage() {
               </div>
             </div>
             {business.is_lao_owned && (
-              <span style={{ backgroundColor: '#f0f9f4', color: GREEN }} className="text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap shrink-0">
+              <span className="bg-maroon-tint text-maroon-ink text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap shrink-0">
                 Lao Owned
               </span>
             )}

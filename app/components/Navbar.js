@@ -10,7 +10,7 @@ export default function Navbar() {
         <a href="/" style={{ color: 'white' }} className="text-sm font-medium hover:opacity-80 transition">
           Directory
         </a>
-        <Link href="/submit" style={{ backgroundColor: '#f0f9f4', color: '#2d5a3d' }} className="text-sm font-semibold px-4 py-2 rounded-full hover:opacity-90 transition">
+        <Link href="/submit" className="bg-gold text-gold-ink text-sm font-semibold px-4 py-2 rounded-full hover:opacity-90 transition">
           Submit a Business
         </Link>
       </div>
