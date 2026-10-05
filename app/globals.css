@@ -1,12 +1,24 @@
 @import "tailwindcss";
 
+/* Make Tailwind's font-sans / font-display utilities use the site fonts */
+@theme inline {
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-heading), ui-serif, Georgia, serif;
+}
+
 /* In the base layer so Tailwind utility classes (e.g. text-white on links) can override these */
 @layer base {
   body {
     background-color: #f9f9f7;
     color: #1a1a1a;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font-body), -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
+  }
+
+  /* Headings in Fraunces, except small all-caps labels (sidebar, footer), which stay in Inter */
+  :where(h1, h2, h3, h4):not(.uppercase) {
+    font-family: var(--font-heading), Georgia, serif;
+    letter-spacing: -0.01em;
   }
 
   a {
