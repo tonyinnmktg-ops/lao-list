@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
 
         <div className="col-span-1">
-          <h2 className="text-xl font-bold mb-2">Lao List</h2>
+          <h2 className="text-xl font-bold mb-2">LaoList</h2>
           <p className="text-white opacity-60 text-sm leading-relaxed">
             A community directory of Lao-owned and Lao-inspired businesses across the United States.
           </p>
@@ -42,7 +42,7 @@ export default function Footer() {
       </div>
 
       <div className="max-w-5xl mx-auto mt-10 pt-6 border-t border-white border-opacity-20 text-xs text-white opacity-40 flex justify-between">
-        <span>© {new Date().getFullYear()} Lao List. All rights reserved.</span>
+        <span>© {new Date().getFullYear()} LaoList. All rights reserved.</span>
         <span>Made with ♥ for the Lao community</span>
       </div>
     </footer>

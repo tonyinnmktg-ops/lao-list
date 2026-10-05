@@ -4,7 +4,7 @@ export default function Navbar() {
   return (
     <nav style={{ backgroundColor: '#2d5a3d' }} className="px-6 py-4 flex items-center justify-between">
       <a href="/" className="text-xl font-bold text-white tracking-tight">
-        Lao List
+        LaoList
       </a>
       <div className="flex items-center gap-6">
         <a href="/" style={{ color: 'white' }} className="text-sm font-medium hover:opacity-80 transition">

@@ -34,7 +34,7 @@ try {
     return Response.json({ error: 'Submission not found' }, { status: 404 })
   }
 
-  const prompt = `You are reviewing a business submission for Lao List, a directory of Lao-owned and Lao-inspired businesses in the United States.
+  const prompt = `You are reviewing a business submission for LaoList, a directory of Lao-owned and Lao-inspired businesses in the United States.
 
 Here is the submission:
 - Name: ${submission.name}

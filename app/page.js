@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../lib/supabase'
 import { CATEGORIES, categoryHref } from '../lib/categories'
 import BusinessCard from './components/BusinessCard'
+import FAQSection from './components/FAQSection'
 import { METROS, getMetro, inMetro, cityKey } from '../lib/metros'
 
 const GREEN = '#2d5a3d'
@@ -276,6 +277,8 @@ function HomeInner() {
                 ))}
               </div>
             </section>
+
+            <FAQSection />
           </div>
         ) : (
           <div>

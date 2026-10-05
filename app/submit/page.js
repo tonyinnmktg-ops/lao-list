@@ -44,7 +44,7 @@ export default function SubmitPage() {
       <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
         <div className="text-4xl mb-4">🎉</div>
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Thank you!</h1>
-        <p className="text-gray-500">Your submission is under review and will be added to Lao List shortly.</p>
+        <p className="text-gray-500">Your submission is under review and will be added to LaoList shortly.</p>
         <a href="/" style={{ backgroundColor: '#2d5a3d' }} className="inline-block mt-6 text-white font-semibold px-6 py-3 rounded-full hover:opacity-90 transition">
           Back to Directory
         </a>
