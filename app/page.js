@@ -176,7 +176,22 @@ function HomeInner() {
 
   return (
     <main>
-      <div style={{ backgroundColor: GREEN }} className="px-6 py-16 text-center">
+      <div style={{ backgroundColor: GREEN }} className="relative overflow-hidden px-6 py-16 text-center">
+        {/* Lao textile (sinh weave) as a white texture under the green; screen blend drops the dark threads */}
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: 'url(/images/lao-textile-pattern.jpg)',
+            backgroundSize: '540px auto',
+            backgroundPosition: 'center top',
+            mixBlendMode: 'screen',
+            opacity: 0.16,
+            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0, #000 48px)',
+            maskImage: 'linear-gradient(to bottom, transparent 0, #000 48px)',
+          }}
+        />
+        <div className="relative">
         <h1 className="text-4xl font-bold text-white mb-3">Discover Lao Businesses</h1>
         <p className="text-white opacity-70 text-lg max-w-xl mx-auto mb-8">
           A community directory of Lao-owned and Lao-inspired businesses across the United States.
@@ -197,6 +212,7 @@ function HomeInner() {
             Search
           </button>
         </form>
+        </div>
       </div>
 
       <div className={(isDirectory ? "max-w-6xl" : "max-w-5xl") + " mx-auto px-6 py-8"}>
