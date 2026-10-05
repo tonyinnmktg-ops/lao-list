@@ -1,13 +1,16 @@
 @import "tailwindcss";
 
-body {
-  background-color: #f9f9f7;
-  color: #1a1a1a;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
+/* In the base layer so Tailwind utility classes (e.g. text-white on links) can override these */
+@layer base {
+  body {
+    background-color: #f9f9f7;
+    color: #1a1a1a;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }

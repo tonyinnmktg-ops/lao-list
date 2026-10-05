@@ -105,6 +105,11 @@ export default function BusinessPage() {
           <a href="/" className="text-gray-500 hover:text-gray-700">Home</a>
         </div>
 
+        {business.status === 'closed' && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            This business has been reported as permanently closed.
+          </div>
+        )}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <div className="flex items-start justify-between mb-6 gap-4">
             <div>
@@ -174,6 +179,13 @@ export default function BusinessPage() {
             )}
           </div>
         </div>
+
+        <p className="text-sm text-gray-500 mt-4">
+          Something wrong or missing?{' '}
+          <a href={'/business/' + business.id + '/edit'} className="font-medium hover:underline" style={{ color: GREEN }}>
+            Suggest an edit
+          </a>
+        </p>
       </div>
 
       {(nearby.length > 0 || otherInState.length > 0) && (
