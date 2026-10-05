@@ -1,78 +1,135 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../lib/supabase'
+import { CATEGORIES, categoryHref } from '../lib/categories'
+import BusinessCard from './components/BusinessCard'
+
+const GREEN = '#2d5a3d'
+const cities = ['Houston', 'Minneapolis', 'Los Angeles', 'Dallas', 'Atlanta', 'Seattle']
 
 export default function Home() {
-  const [businesses, setBusinesses] = useState([])
+  return (
+    <Suspense fallback={null}>
+      <HomeInner />
+    </Suspense>
+  )
+}
+
+function HomeInner() {
+  const router = useRouter()
+  const params = useSearchParams()
+  const category = params.get('category') || ''
+  const state = params.get('state') || ''
+  const q = params.get('q') || ''
+  const isDirectory = Boolean(category || state || q)
+
+  const [searchInput, setSearchInput] = useState(q)
   const [featured, setFeatured] = useState([])
-  const [filter, setFilter] = useState({ state: '', category: '' })
-  const [search, setSearch] = useState('')
-  const [searchInput, setSearchInput] = useState('')
-  const [view, setView] = useState('home')
+  const [counts, setCounts] = useState({})
+  const [states, setStates] = useState([])
+  const [businesses, setBusinesses] = useState([])
+  const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    if (view !== 'home') {
-      fetchBusinesses()
-    }
-  }, [filter, search, view])
+  useEffect(() => setSearchInput(q), [q])
 
+  // One-time: featured, category counts, state list
   useEffect(() => {
     fetchFeatured()
+    supabase
+      .from('businesses')
+      .select('category, state')
+      .eq('status', 'active')
+      .then(({ data }) => {
+        if (!data) return
+        const c = {}
+        const s = new Set()
+        data.forEach((b) => {
+          c[b.category] = (c[b.category] || 0) + 1
+          if (b.state) s.add(b.state)
+        })
+        setCounts(c)
+        setStates([...s].sort())
+      })
   }, [])
 
+  useEffect(() => {
+    if (isDirectory) fetchBusinesses()
+  }, [category, state, q])
+
   async function fetchFeatured() {
-    const { data } = await supabase
+    // Businesses marked featured first; top up to 3 with highest-rated businesses that have photos
+    const { data: marked } = await supabase
       .from('businesses')
       .select('*')
-      .eq('featured', true)
       .eq('status', 'active')
-    if (data) setFeatured(data)
+      .eq('featured', true)
+      .limit(3)
+    let list = marked || []
+    if (list.length < 3) {
+      const { data: top } = await supabase
+        .from('businesses')
+        .select('*')
+        .eq('status', 'active')
+        .not('photo_url', 'is', null)
+        .order('rating', { ascending: false, nullsFirst: false })
+        .limit(12)
+      // Prefer variety: one per category before repeating
+      const seenIds = new Set(list.map((b) => b.id))
+      const seenCats = new Set(list.map((b) => b.category))
+      const pool = (top || []).filter((b) => !seenIds.has(b.id))
+      const firstPass = pool.filter((b) => {
+        if (seenCats.has(b.category)) return false
+        seenCats.add(b.category)
+        return true
+      })
+      const rest = pool.filter((b) => !firstPass.includes(b))
+      list = [...list, ...firstPass, ...rest].slice(0, 3)
+    }
+    setFeatured(list)
   }
 
   async function fetchBusinesses() {
+    setLoading(true)
     let query = supabase.from('businesses').select('*').eq('status', 'active')
-    if (search) {
+    if (q) {
       query = query.or(
-        `name.ilike.%${search}%,city.ilike.%${search}%,category.ilike.%${search}%,description.ilike.%${search}%`
+        `name.ilike.%${q}%,city.ilike.%${q}%,category.ilike.%${q}%,description.ilike.%${q}%`
       )
     }
-    if (filter.state) query = query.eq('state', filter.state)
-    if (filter.category) query = query.ilike('category', `%${filter.category}%`)
+    if (state) query = query.eq('state', state)
+    if (category) query = query.eq('category', category)
     const { data } = await query
-    if (data) setBusinesses(data)
+      .order('photo_url', { ascending: true, nullsFirst: false })
+      .order('rating', { ascending: false, nullsFirst: false })
+    setBusinesses(data || [])
+    setLoading(false)
+  }
+
+  function go(next) {
+    const p = new URLSearchParams()
+    const merged = { category, state, q, ...next }
+    Object.entries(merged).forEach(([k, v]) => v && p.set(k, v))
+    const qs = p.toString()
+    router.push(qs ? '/?' + qs : '/')
   }
 
   function handleSearch(e) {
     e.preventDefault()
-    setSearch(searchInput)
-    setView('directory')
+    go({ q: searchInput.trim(), category: '', state: '' })
   }
 
-  function showDirectory(category) {
-    setFilter({ state: '', category: category || '' })
-    setView('directory')
-  }
-
-  function showCity(city) {
-    setSearch(city)
-    setSearchInput(city)
-    setFilter({ state: '', category: '' })
-    setView('directory')
-  }
-
-  const categories = [
-    { label: 'Restaurants', value: 'Laotian restaurant', image: '/images/lao-restaurant.jpg' },
-    { label: 'Nonprofits', value: 'Community & Faith', image: '/images/lao-nonprofit.jpg' },
-    { label: 'Services', value: 'service', image: '/images/lao-services.jpg' },
-    { label: 'Retail', value: 'retail', image: '/images/lao-retail.webp' },
+  const heading = [
+    category || (q ? `Results for “${q}”` : 'All businesses'),
+    state ? `in ${state}` : '',
   ]
-
-  const cities = ['Houston', 'Minneapolis', 'Los Angeles', 'Dallas', 'Atlanta', 'Seattle']
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <main>
-      <div style={{ backgroundColor: '#2d5a3d' }} className="px-6 py-16 text-center">
+      <div style={{ backgroundColor: GREEN }} className="px-6 py-16 text-center">
         <h1 className="text-4xl font-bold text-white mb-3">Discover Lao Businesses</h1>
         <p className="text-white opacity-70 text-lg max-w-xl mx-auto mb-8">
           A community directory of Lao-owned and Lao-inspired businesses across the United States.
@@ -88,170 +145,125 @@ export default function Home() {
           <button
             type="submit"
             className="px-6 py-3 rounded-full font-semibold text-sm transition"
-            style={{ backgroundColor: '#f0f9f4', color: '#2d5a3d' }}
+            style={{ backgroundColor: '#f0f9f4', color: GREEN }}
           >
             Search
           </button>
         </form>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        {view === 'home' ? (
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        {!isDirectory ? (
           <div>
             {featured.length > 0 && (
-              <div className="mb-12">
+              <section className="mb-12">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Featured Businesses</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {featured.map((biz) => {
-                    return (
-                      <a
-                        key={biz.id}
-                        href={'/business/' + biz.id}
-                        className="bg-white rounded-xl overflow-hidden border border-gray-100 block hover:shadow-md transition"
-                      >
-                        <div className="h-40 overflow-hidden relative">
-                          <img
-                            src={biz.photo_url || '/images/lao-restaurant.jpg'}
-                            alt={biz.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black opacity-20" />
-                          <span style={{ backgroundColor: '#2d5a3d' }} className="absolute top-3 left-3 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                            Featured
-                          </span>
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-lg font-semibold text-gray-900">{biz.name}</h3>
-                          <p className="text-sm text-gray-500 mt-1">{biz.category} · {biz.city}, {biz.state}</p>
-                          {biz.description && (
-                            <p className="text-sm text-gray-600 mt-2">{biz.description}</p>
-                          )}
-                        </div>
-                      </a>
-                    )
-                  })}
+                  {featured.map((biz) => (
+                    <BusinessCard key={biz.id} biz={biz} badge="Featured" />
+                  ))}
                 </div>
-              </div>
+              </section>
             )}
 
-            <div className="mb-12">
+            <section className="mb-12">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Category</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {categories.map(({ label, value, image }) => {
-                  return (
-                    <button
-                      key={value}
-                      onClick={() => showDirectory(value)}
-                      className="relative rounded-2xl overflow-hidden h-40 group cursor-pointer"
-                    >
-                      <img src={image} alt={label} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-                      <div className="absolute inset-0 bg-black opacity-40 group-hover:opacity-30 transition" />
-                      <span className="absolute inset-0 flex items-end p-4 text-white font-bold text-lg">{label}</span>
-                    </button>
-                  )
-                })}
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {CATEGORIES.map(({ label, value, image }) => (
+                  <a
+                    key={value}
+                    href={categoryHref(value)}
+                    className="relative rounded-2xl overflow-hidden h-40 group block"
+                    style={image ? undefined : { backgroundColor: GREEN }}
+                  >
+                    {image && (
+                      <img
+                        src={image}
+                        alt={label}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-black opacity-40 group-hover:opacity-30 transition" />
+                    <span className="absolute inset-0 flex flex-col justify-end p-4 text-white">
+                      <span className="font-bold text-lg leading-tight">{label}</span>
+                      {counts[value] != null && (
+                        <span className="text-xs opacity-80 mt-1">{counts[value]} listings</span>
+                      )}
+                    </span>
+                  </a>
+                ))}
               </div>
-            </div>
+            </section>
 
-            <div className="mb-12">
+            <section className="mb-12">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by City</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {cities.map((city) => {
-                  return (
-                    <button
-                      key={city}
-                      onClick={() => showCity(city)}
-                      className="text-left px-5 py-4 bg-white border border-gray-100 rounded-xl hover:shadow-md hover:border-gray-200 transition"
-                    >
-                      <span className="font-medium text-gray-900">{city}</span>
-                    </button>
-                  )
-                })}
+                {cities.map((city) => (
+                  <a
+                    key={city}
+                    href={'/?q=' + encodeURIComponent(city)}
+                    className="text-left px-5 py-4 bg-white border border-gray-100 rounded-xl hover:shadow-md hover:border-gray-200 transition block"
+                  >
+                    <span className="font-medium text-gray-900">{city}</span>
+                  </a>
+                ))}
               </div>
-            </div>
+            </section>
           </div>
         ) : (
           <div>
+            <a href="/" className="text-sm font-medium inline-flex items-center gap-1 mb-4" style={{ color: GREEN }}>
+              <span aria-hidden>←</span> Back to Home
+            </a>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{heading}</h2>
+
             <div className="flex gap-3 mb-8 flex-wrap items-center">
               <select
-                onChange={(e) => { setFilter({ ...filter, state: e.target.value }); setView('directory') }}
-                className="border border-gray-200 bg-white px-4 py-2 rounded-full text-sm font-medium focus:outline-none"
-              >
-                <option value="">All States</option>
-                <option value="California">California</option>
-                <option value="Texas">Texas</option>
-                <option value="Minnesota">Minnesota</option>
-                <option value="Washington">Washington</option>
-                <option value="Georgia">Georgia</option>
-                <option value="Illinois">Illinois</option>
-                <option value="North Carolina">North Carolina</option>
-                <option value="Massachusetts">Massachusetts</option>
-                <option value="Wisconsin">Wisconsin</option>
-                <option value="Kansas">Kansas</option>
-              </select>
-
-              <select
-                onChange={(e) => { setFilter({ ...filter, category: e.target.value }); setView('directory') }}
+                value={category}
+                onChange={(e) => go({ category: e.target.value })}
                 className="border border-gray-200 bg-white px-4 py-2 rounded-full text-sm font-medium focus:outline-none"
               >
                 <option value="">All Categories</option>
-                <option value="restaurant">Restaurant</option>
-                <option value="Community & Faith">Nonprofit</option>
-                <option value="service">Service</option>
-                <option value="retail">Retail</option>
-                <option value="other">Other</option>
+                {CATEGORIES.map((c) => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
+                ))}
               </select>
 
-              <a
-                href="/"
-                style={{ color: '#2d5a3d' }}
-                className="text-sm px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition"
+              <select
+                value={state}
+                onChange={(e) => go({ state: e.target.value })}
+                className="border border-gray-200 bg-white px-4 py-2 rounded-full text-sm font-medium focus:outline-none"
               >
-                Back to Home
-              </a>
+                <option value="">All States</option>
+                {states.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
 
-              {search && (
+              {q && (
                 <button
-                  onClick={() => { setSearch(''); setSearchInput('') }}
+                  onClick={() => go({ q: '' })}
                   className="text-sm px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition"
-                  style={{ color: '#2d5a3d' }}
+                  style={{ color: GREEN }}
                 >
                   Clear search
                 </button>
               )}
 
-              <span className="text-sm text-gray-400">{businesses.length} listings</span>
+              {!loading && <span className="text-sm text-gray-400">{businesses.length} listings</span>}
             </div>
 
-            <div className="grid gap-4">
-              {businesses.map((biz) => {
-                return (
-                  <a
-                    key={biz.id}
-                    href={'/business/' + biz.id}
-                    className="bg-white border border-gray-100 rounded-xl p-5 block hover:shadow-md hover:border-gray-200 transition"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h2 className="text-lg font-semibold text-gray-900">{biz.name}</h2>
-                        <p className="text-sm text-gray-500 mt-1">{biz.category} · {biz.city}, {biz.state}</p>
-                        {biz.description && (
-                          <p className="text-sm text-gray-600 mt-2">{biz.description}</p>
-                        )}
-                      </div>
-                      {biz.is_lao_owned && (
-                        <span style={{ backgroundColor: '#f0f9f4', color: '#2d5a3d' }} className="text-xs font-semibold px-3 py-1 rounded-full ml-4 whitespace-nowrap">
-                          Lao Owned
-                        </span>
-                      )}
-                    </div>
-                  </a>
-                )
-              })}
-              {businesses.length === 0 && (
-                <p className="text-gray-400 text-center py-12">No businesses found.</p>
-              )}
-            </div>
+            {loading ? (
+              <p className="text-gray-400 text-center py-12">Loading...</p>
+            ) : businesses.length === 0 ? (
+              <p className="text-gray-400 text-center py-12">No businesses found.</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {businesses.map((biz) => (
+                  <BusinessCard key={biz.id} biz={biz} />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

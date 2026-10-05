@@ -3,22 +3,63 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
+import { categoryHref, stateHref } from '../../../lib/categories'
+import BusinessCard from '../../components/BusinessCard'
+
+const GREEN = '#2d5a3d'
 
 export default function BusinessPage() {
   const params = useParams()
   const [business, setBusiness] = useState(null)
+  const [nearby, setNearby] = useState([])
+  const [nearbyScope, setNearbyScope] = useState('state') // 'state' | 'national'
+  const [otherInState, setOtherInState] = useState([])
 
   useEffect(() => {
-    async function fetchBusiness() {
+    async function load() {
       const { data } = await supabase
         .from('businesses')
         .select('*')
         .eq('id', params.id)
         .single()
-      if (data) setBusiness(data)
+      if (!data) return
+      setBusiness(data)
+      loadDiscovery(data)
     }
-    if (params.id) fetchBusiness()
+    if (params.id) load()
   }, [params.id])
+
+  async function loadDiscovery(biz) {
+    const base = () =>
+      supabase
+        .from('businesses')
+        .select('*')
+        .eq('status', 'active')
+        .neq('id', biz.id)
+        .order('photo_url', { ascending: true, nullsFirst: false })
+        .order('rating', { ascending: false, nullsFirst: false })
+
+    // 1. Same category, same state. Fall back to same category anywhere if the state is thin.
+    let same = []
+    if (biz.state) {
+      const { data } = await base().eq('category', biz.category).eq('state', biz.state).limit(6)
+      same = data || []
+    }
+    if (same.length < 3) {
+      const { data } = await base().eq('category', biz.category).limit(6)
+      setNearbyScope('national')
+      setNearby(data || [])
+    } else {
+      setNearbyScope('state')
+      setNearby(same)
+    }
+
+    // 2. Other categories in the same state
+    if (biz.state) {
+      const { data } = await base().eq('state', biz.state).neq('category', biz.category).limit(3)
+      setOtherInState(data || [])
+    }
+  }
 
   if (!business) return (
     <main className="max-w-3xl mx-auto px-4 py-12">
@@ -26,12 +67,22 @@ export default function BusinessPage() {
     </main>
   )
 
+  const address = business.address
+    ? `${business.address}, ${business.city}, ${business.state} ${business.zip || ''}`.trim()
+    : business.formatted_address
+
+  const mapsUrl =
+    business.google_url ||
+    (business.place_id
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.name)}&query_place_id=${business.place_id}`
+      : null)
+
   return (
     <main>
       {business.photo_url && (
         <div className="w-full h-64 overflow-hidden relative">
           <img
-src={business.photo_url ? business.photo_url.replace('w408', 'w1200') : ''}
+            src={business.photo_url.replace('w408', 'w1200')}
             alt={business.name}
             className="w-full h-full object-cover"
           />
@@ -40,18 +91,26 @@ src={business.photo_url ? business.photo_url.replace('w408', 'w1200') : ''}
       )}
 
       <div className="max-w-3xl mx-auto px-4 py-8">
-        <a href="/" className="text-sm font-medium mb-6 inline-block" style={{ color: '#2d5a3d' }}>
-          Back to Directory
-        </a>
+        <div className="flex flex-wrap gap-x-5 gap-y-2 mb-4 text-sm font-medium">
+          {business.category && (
+            <a href={categoryHref(business.category)} className="inline-flex items-center gap-1" style={{ color: GREEN }}>
+              <span aria-hidden>←</span> Back to all {business.category}
+            </a>
+          )}
+          <a href="/" className="text-gray-500 hover:text-gray-700">Home</a>
+        </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 mt-2">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <div className="flex items-start justify-between mb-6 gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{business.name}</h1>
-              <p className="text-gray-500 mt-1 text-sm">{business.category} · {business.city}, {business.state}</p>
+              <p className="text-gray-500 mt-1 text-sm">
+                {business.category} · {[business.city, business.state].filter(Boolean).join(', ')}
+                {business.rating && <> · ★ {business.rating}</>}
+              </p>
             </div>
             {business.is_lao_owned && (
-              <span style={{ backgroundColor: '#f0f9f4', color: '#2d5a3d' }} className="text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap shrink-0">
+              <span style={{ backgroundColor: '#f0f9f4', color: GREEN }} className="text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap shrink-0">
                 Lao Owned
               </span>
             )}
@@ -62,49 +121,89 @@ src={business.photo_url ? business.photo_url.replace('w408', 'w1200') : ''}
           )}
 
           <div className="flex flex-col gap-4 border-t border-gray-100 pt-6">
-            {(business.address || business.formatted_address) && (
-              <div className="flex flex-col sm:flex-row sm:gap-3">
-                <span className="font-semibold text-gray-700 text-sm sm:w-28 shrink-0">Address</span>
-                <span className="text-gray-600 text-sm">
-                  {business.address
-                    ? `${business.address}, ${business.city}, ${business.state} ${business.zip}`
-                    : business.formatted_address}
-                </span>
-              </div>
+            {address && (
+              <Row label="Address">
+                <span className="text-gray-600 text-sm">{address}</span>
+              </Row>
             )}
             {business.phone && (
-              <div className="flex flex-col sm:flex-row sm:gap-3">
-                <span className="font-semibold text-gray-700 text-sm sm:w-28 shrink-0">Phone</span>
-                <a href={'tel:' + business.phone} style={{ color: '#2d5a3d' }} className="hover:underline text-sm">{business.phone}</a>
-              </div>
+              <Row label="Phone">
+                <a href={'tel:' + business.phone} style={{ color: GREEN }} className="hover:underline text-sm">{business.phone}</a>
+              </Row>
             )}
             {business.website && (
-              <div className="flex flex-col sm:flex-row sm:gap-3">
-                <span className="font-semibold text-gray-700 text-sm sm:w-28 shrink-0">Website</span>
-                <a href={business.website} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline text-sm break-all">{business.website}</a>
-              </div>
+              <Row label="Website">
+                <a href={business.website} target="_blank" rel="noopener" style={{ color: GREEN }} className="hover:underline text-sm break-all">{business.website}</a>
+              </Row>
             )}
-            {business.google_url && (
-              <div className="flex flex-col sm:flex-row sm:gap-3">
-                <span className="font-semibold text-gray-700 text-sm sm:w-28 shrink-0">Google Maps</span>
-                <a href={business.google_url} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline text-sm">View on Google Maps</a>
-              </div>
+            {mapsUrl && (
+              <Row label="Google Maps">
+                <a href={mapsUrl} target="_blank" rel="noopener" style={{ color: GREEN }} className="hover:underline text-sm">View on Google Maps</a>
+              </Row>
             )}
             {business.instagram && (
-              <div className="flex flex-col sm:flex-row sm:gap-3">
-                <span className="font-semibold text-gray-700 text-sm sm:w-28 shrink-0">Instagram</span>
-                <a href={'https://instagram.com/' + business.instagram.replace('@', '')} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline text-sm">@{business.instagram.replace('@', '')}</a>
-              </div>
+              <Row label="Instagram">
+                <a href={'https://instagram.com/' + business.instagram.replace('@', '')} target="_blank" rel="noopener" style={{ color: GREEN }} className="hover:underline text-sm">@{business.instagram.replace('@', '')}</a>
+              </Row>
             )}
             {business.facebook && (
-              <div className="flex flex-col sm:flex-row sm:gap-3">
-                <span className="font-semibold text-gray-700 text-sm sm:w-28 shrink-0">Facebook</span>
-                <a href={business.facebook} target="_blank" style={{ color: '#2d5a3d' }} className="hover:underline text-sm break-all">{business.facebook}</a>
-              </div>
+              <Row label="Facebook">
+                <a href={business.facebook} target="_blank" rel="noopener" style={{ color: GREEN }} className="hover:underline text-sm break-all">{business.facebook}</a>
+              </Row>
             )}
           </div>
         </div>
       </div>
+
+      {(nearby.length > 0 || otherInState.length > 0) && (
+        <div className="max-w-5xl mx-auto px-4 pb-16">
+          {nearby.length > 0 && (
+            <DiscoverSection
+              title={
+                nearbyScope === 'state'
+                  ? `Discover more ${business.category} in ${business.state}`
+                  : `Discover more ${business.category}`
+              }
+              href={nearbyScope === 'state' ? stateHref(business.state, business.category) : categoryHref(business.category)}
+              items={nearby}
+            />
+          )}
+          {otherInState.length > 0 && (
+            <DiscoverSection
+              title={`More Lao businesses in ${business.state}`}
+              href={stateHref(business.state)}
+              items={otherInState}
+            />
+          )}
+        </div>
+      )}
     </main>
+  )
+}
+
+function Row({ label, children }) {
+  return (
+    <div className="flex flex-col sm:flex-row sm:gap-3">
+      <span className="font-semibold text-gray-700 text-sm sm:w-28 shrink-0">{label}</span>
+      {children}
+    </div>
+  )
+}
+
+function DiscoverSection({ title, href, items }) {
+  return (
+    <section className="mt-10">
+      <div className="flex items-baseline justify-between gap-4 mb-4">
+        <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+        <a href={href} className="text-sm font-medium whitespace-nowrap" style={{ color: GREEN }}>
+          See all →
+        </a>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {items.map((b) => (
+          <BusinessCard key={b.id} biz={b} />
+        ))}
+      </div>
+    </section>
   )
 }
