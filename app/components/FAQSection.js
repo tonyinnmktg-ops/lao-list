@@ -64,7 +64,7 @@ export default function FAQSection() {
   }
 
   return (
-    <section className="border-t border-gray-200 pt-12 mt-4 mb-8">
+    <div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <div className="grid md:grid-cols-2 gap-6 md:gap-12 mb-14">
@@ -142,6 +142,6 @@ export default function FAQSection() {
           )
         })}
       </div>
-    </section>
+    </div>
   )
 }

@@ -177,7 +177,7 @@ function HomeInner() {
 
   return (
     <main>
-      <div style={{ backgroundColor: GREEN }} className="relative overflow-hidden px-6 py-16 text-center">
+      <div style={{ backgroundColor: GREEN }} className={"relative overflow-hidden px-6 text-center " + (isDirectory ? "py-16" : "pt-16 pb-28")}>
         {/* Lao textile (sinh weave) as a white texture under the green; screen blend drops the dark threads */}
         <div
           aria-hidden
@@ -216,22 +216,22 @@ function HomeInner() {
         </div>
       </div>
 
-      <div className={(isDirectory ? "max-w-6xl" : "max-w-5xl") + " mx-auto px-6 py-8"}>
+      <div className={isDirectory ? "max-w-6xl mx-auto px-6 py-8" : ""}>
         {!isDirectory ? (
           <div>
             {featured.length > 0 && (
-              <section className="mb-12">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Featured Businesses</h2>
+              <Panel from="#f6f6f3" to="#efefeb" z={1}>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10">Featured Businesses</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {featured.map((biz) => (
                     <BusinessCard key={biz.id} biz={biz} badge="Featured" />
                   ))}
                 </div>
-              </section>
+              </Panel>
             )}
 
-            <section className="mb-12">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Category</h2>
+            <Panel from="#ffffff" to="#f7f7f4" z={2}>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10">Browse by Category</h2>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {CATEGORIES.map(({ label, value, image }) => (
                   <a
@@ -257,10 +257,10 @@ function HomeInner() {
                   </a>
                 ))}
               </div>
-            </section>
+            </Panel>
 
-            <section className="mb-12">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Browse by Metro Area</h2>
+            <Panel from="#f3f3f0" to="#ebebe7" z={3}>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10">Browse by Metro Area</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {METROS.map((m) => (
                   <a
@@ -276,9 +276,11 @@ function HomeInner() {
                   </a>
                 ))}
               </div>
-            </section>
+            </Panel>
 
-            <FAQSection />
+            <Panel from="#ffffff" to="#f9f9f7" z={4}>
+              <FAQSection />
+            </Panel>
           </div>
         ) : (
           <div>
@@ -445,5 +447,17 @@ function FilterGroup({ title, action, children }) {
       </div>
       {children}
     </div>
+  )
+}
+
+// Home page section: full-width panel with rounded top corners that overlaps the one above it
+function Panel({ from, to, z, children }) {
+  return (
+    <section
+      className="relative -mt-10 rounded-t-[2rem] md:rounded-t-[2.75rem] pt-14 md:pt-20 pb-24 md:pb-32 shadow-[0_-12px_32px_-16px_rgba(0,0,0,0.18)]"
+      style={{ background: `linear-gradient(to bottom, ${from}, ${to})`, zIndex: z }}
+    >
+      <div className="max-w-5xl mx-auto px-6">{children}</div>
+    </section>
   )
 }
