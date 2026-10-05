@@ -2,11 +2,14 @@
 
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { CATEGORIES, SUBCATEGORIES } from '../../lib/categories'
+import { US_STATES } from '../../lib/states'
 
 export default function SubmitPage() {
   const [form, setForm] = useState({
     name: '',
     category: '',
+    subcategory: '',
     description: '',
     address: '',
     city: '',
@@ -24,7 +27,10 @@ export default function SubmitPage() {
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target
-    setForm({ ...form, [name]: type === 'checkbox' ? checked : value })
+    const next = { ...form, [name]: type === 'checkbox' ? checked : value }
+    // Changing category clears a subcategory that doesn't belong to it
+    if (name === 'category' && !(SUBCATEGORIES[value] || []).includes(form.subcategory)) next.subcategory = ''
+    setForm(next)
   }
 
   async function handleSubmit(e) {
@@ -73,13 +79,28 @@ export default function SubmitPage() {
 
           <div>
             <label className={labelClass}>Category *</label>
-            <select name="category" required onChange={handleChange} className={inputClass}>
+            <select name="category" required value={form.category} onChange={handleChange} className={inputClass}>
               <option value="">Select a category</option>
-              <option value="restaurant">Restaurant</option>
-              <option value="nonprofit">Nonprofit</option>
-              <option value="service">Service</option>
-              <option value="retail">Retail</option>
-              <option value="other">Other</option>
+              {CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className={labelClass}>Subcategory *</label>
+            <select
+              name="subcategory"
+              required
+              value={form.subcategory}
+              onChange={handleChange}
+              disabled={!form.category}
+              className={inputClass + ' disabled:bg-gray-50 disabled:text-gray-400'}
+            >
+              <option value="">{form.category ? 'Select a subcategory' : 'Choose a category first'}</option>
+              {(SUBCATEGORIES[form.category] || []).map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
             </select>
           </div>
 
@@ -95,7 +116,12 @@ export default function SubmitPage() {
             </div>
             <div>
               <label className={labelClass}>State</label>
-              <input name="state" onChange={handleChange} className={inputClass} />
+              <select name="state" value={form.state} onChange={handleChange} className={inputClass}>
+                <option value="">Select a state</option>
+                {US_STATES.map((st) => (
+                  <option key={st} value={st}>{st}</option>
+                ))}
+              </select>
             </div>
           </div>
 

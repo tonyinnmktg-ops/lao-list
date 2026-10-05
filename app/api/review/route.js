@@ -8,6 +8,14 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+// Old form values, in case a submission made before the category update is approved later
+const LEGACY_CATEGORIES = {
+  restaurant: 'Food & Beverage',
+  nonprofit: 'Community & Faith',
+  service: 'Services',
+  retail: 'Retail',
+}
+
 export async function POST(req) {
   let submissionId
 try {
@@ -65,9 +73,12 @@ NOTES: your brief reasoning`
   if (decision === 'approved') {
     await supabase.from('businesses').insert([{
       name: submission.name,
-      category: submission.category,
+      category: LEGACY_CATEGORIES[submission.category] || submission.category,
+      subcategory: submission.subcategory || null,
       description: submission.description,
       address: submission.address,
+      formatted_address: [submission.address, submission.city, [submission.state, submission.zip].filter(Boolean).join(' ')]
+        .filter(Boolean).join(', ') || null,
       city: submission.city,
       state: submission.state,
       zip: submission.zip,
