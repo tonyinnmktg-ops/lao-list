@@ -62,10 +62,14 @@ src={business.photo_url ? business.photo_url.replace('w408', 'w1200') : ''}
           )}
 
           <div className="flex flex-col gap-4 border-t border-gray-100 pt-6">
-            {business.address && (
+            {(business.address || business.formatted_address) && (
               <div className="flex flex-col sm:flex-row sm:gap-3">
                 <span className="font-semibold text-gray-700 text-sm sm:w-28 shrink-0">Address</span>
-                <span className="text-gray-600 text-sm">{business.address}, {business.city}, {business.state} {business.zip}</span>
+                <span className="text-gray-600 text-sm">
+                  {business.address
+                    ? `${business.address}, ${business.city}, ${business.state} ${business.zip}`
+                    : business.formatted_address}
+                </span>
               </div>
             )}
             {business.phone && (

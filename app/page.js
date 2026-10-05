@@ -63,7 +63,7 @@ export default function Home() {
 
   const categories = [
     { label: 'Restaurants', value: 'Laotian restaurant', image: '/images/lao-restaurant.jpg' },
-    { label: 'Nonprofits', value: 'nonprofit', image: '/images/lao-nonprofit.jpg' },
+    { label: 'Nonprofits', value: 'Community & Faith', image: '/images/lao-nonprofit.jpg' },
     { label: 'Services', value: 'service', image: '/images/lao-services.jpg' },
     { label: 'Retail', value: 'retail', image: '/images/lao-retail.webp' },
   ]
@@ -196,7 +196,7 @@ export default function Home() {
               >
                 <option value="">All Categories</option>
                 <option value="restaurant">Restaurant</option>
-                <option value="nonprofit">Nonprofit</option>
+                <option value="Community & Faith">Nonprofit</option>
                 <option value="service">Service</option>
                 <option value="retail">Retail</option>
                 <option value="other">Other</option>
