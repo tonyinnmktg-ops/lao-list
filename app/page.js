@@ -193,9 +193,9 @@ function HomeInner() {
           }}
         />
         <div className="relative">
-        <h1 className="text-5xl md:text-7xl font-semibold text-white leading-[1.05] tracking-tight max-w-4xl mx-auto mb-5">Discover Lao Businesses</h1>
+        <h1 className="text-5xl md:text-7xl font-semibold text-white leading-[1.05] tracking-tight max-w-4xl mx-auto mb-5">Lao owned. Community grown.</h1>
         <p className="text-white/80 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-10">
-          A community directory of Lao-owned and Lao-inspired businesses across the United States.
+          From family kitchens to neighborhood markets, find Lao businesses across America. Made by the community, for the community.
         </p>
         <form onSubmit={handleSearch} className="max-w-xl mx-auto flex gap-2">
           <input
