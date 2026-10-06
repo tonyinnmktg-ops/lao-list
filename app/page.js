@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../lib/supabase'
 import { CATEGORIES, OTHER, categoryHref } from '../lib/categories'
 import BusinessCard from './components/BusinessCard'
@@ -29,7 +29,9 @@ function HomeInner() {
   const metroSlug = params.get('metro') || ''
   const metro = getMetro(metroSlug)
   const city = params.get('city') || ''
-  const isDirectory = Boolean(category || state || q || metro || city || subs.length)
+  // /directory always shows listings (all of them when no filters are set)
+  const onDirectoryRoute = usePathname() === '/directory'
+  const isDirectory = onDirectoryRoute || Boolean(category || state || q || metro || city || subs.length)
 
   const [searchInput, setSearchInput] = useState(q)
   const [featured, setFeatured] = useState([])
@@ -68,7 +70,7 @@ function HomeInner() {
 
   useEffect(() => {
     if (isDirectory) fetchBusinesses()
-  }, [category, state, q, metroSlug])
+  }, [category, state, q, metroSlug, onDirectoryRoute])
 
   async function fetchFeatured() {
     // Businesses marked featured first; top up to 3 with highest-rated businesses that have photos
@@ -133,7 +135,8 @@ function HomeInner() {
       else if (v) p.set(k, v)
     })
     const qs = p.toString()
-    router.push(qs ? '/?' + qs : '/')
+    const base = onDirectoryRoute ? '/directory' : '/'
+    router.push(qs ? base + '?' + qs : base)
   }
 
   function handleSearch(e) {
@@ -177,7 +180,7 @@ function HomeInner() {
   const homeCategories = showAllCategories ? sortedCategories : sortedCategories.slice(0, HOME_CATEGORY_COUNT)
 
   const heading = [
-    (subs.length && subs.length <= 2 ? subs.join(' & ') : '') || category || (q ? `Results for “${q}”` : 'Lao businesses'),
+    (subs.length && subs.length <= 2 ? subs.join(' & ') : '') || category || (q ? `Results for “${q}”` : onDirectoryRoute && !state && !metro && !city ? 'All Lao businesses' : 'Lao businesses'),
     city ? `in ${city.split(', ')[0]}` : metro ? `in ${metro.label}` : state ? `in ${state}` : '',
   ]
     .filter(Boolean)
