@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
-import { categoryHref, stateHref, subcategoryHref } from '../../../lib/categories'
+import { categoryHref, stateHref, subcategoryHref, typeLabel } from '../../../lib/categories'
 import BusinessCard from '../../components/BusinessCard'
 
 const GREEN = '#2d5a3d'
@@ -129,7 +129,7 @@ export default function BusinessPage() {
                     href={subcategoryHref(business.category, business.subcategory)}
                     className="text-xs font-medium px-3 py-1 rounded-full hover:opacity-80 bg-teal-tint text-teal-ink"
                   >
-                    {business.subcategory}
+                    {typeLabel(business)}
                   </a>
                 )}
               </div>

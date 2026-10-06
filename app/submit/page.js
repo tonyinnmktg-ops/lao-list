@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { CATEGORIES, SUBCATEGORIES } from '../../lib/categories'
+import { CATEGORIES, SUBCATEGORIES, OTHER, needsNote } from '../../lib/categories'
 import { US_STATES } from '../../lib/states'
 
 export default function SubmitPage() {
@@ -10,6 +10,7 @@ export default function SubmitPage() {
     name: '',
     category: '',
     subcategory: '',
+    category_note: '',
     description: '',
     address: '',
     city: '',
@@ -38,6 +39,8 @@ export default function SubmitPage() {
     setLoading(true)
     const { error } = await supabase.from('submissions').insert([{
       ...form,
+      subcategory: form.category === OTHER ? null : form.subcategory,
+      category_note: needsNote(form.category, form.subcategory) ? form.category_note.trim() : null,
       review_status: 'pending',
       status: 'active'
     }])
@@ -87,6 +90,7 @@ export default function SubmitPage() {
             </select>
           </div>
 
+          {form.category !== OTHER && (
           <div>
             <label className={labelClass}>Subcategory *</label>
             <select
@@ -103,6 +107,23 @@ export default function SubmitPage() {
               ))}
             </select>
           </div>
+          )}
+
+          {needsNote(form.category, form.subcategory) && (
+            <div>
+              <label className={labelClass}>What kind of business is it? *</label>
+              <input
+                name="category_note"
+                required
+                maxLength={60}
+                value={form.category_note}
+                onChange={handleChange}
+                placeholder="Seamstress, tattoo studio, farm"
+                className={inputClass}
+              />
+              <p className="text-xs text-gray-400 mt-1">A few words is perfect. We use these to add new categories.</p>
+            </div>
+          )}
 
           <div>
             <label className={labelClass}>Description</label>

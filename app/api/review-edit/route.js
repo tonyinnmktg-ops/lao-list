@@ -6,7 +6,7 @@ const { createClient } = require('@supabase/supabase-js')
 //   select apply_listing_edit('<edit id>');
 
 const LABELS = {
-  name: 'Name', category: 'Category', subcategory: 'Subcategory', description: 'Description',
+  name: 'Name', category: 'Category', subcategory: 'Subcategory', category_note: 'Business type note', description: 'Description',
   formatted_address: 'Address', phone: 'Phone', website: 'Website', instagram: 'Instagram',
   facebook: 'Facebook', is_lao_owned: 'Lao owned',
 }

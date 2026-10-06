@@ -3,16 +3,17 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../../lib/supabase'
-import { CATEGORIES, SUBCATEGORIES } from '../../../../lib/categories'
+import { CATEGORIES, SUBCATEGORIES, OTHER, needsNote } from '../../../../lib/categories'
 
 const GREEN = '#2d5a3d'
-const TEXT_FIELDS = ['name', 'category', 'subcategory', 'description', 'formatted_address', 'phone', 'website', 'instagram', 'facebook']
+const TEXT_FIELDS = ['name', 'category', 'subcategory', 'category_note', 'description', 'formatted_address', 'phone', 'website', 'instagram', 'facebook']
 
 function initialValues(b) {
   return {
     name: b.name || '',
     category: b.category || '',
     subcategory: b.subcategory || '',
+    category_note: b.category_note || '',
     description: b.description || '',
     formatted_address:
       b.formatted_address || (b.address ? `${b.address}, ${b.city}, ${b.state} ${b.zip || ''}`.trim() : ''),
@@ -141,6 +142,7 @@ export default function SuggestEditPage() {
               {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
           </div>
+          {form.category !== OTHER && (
           <div>
             <label className={label}>Subcategory</label>
             <select className={input} style={changed('subcategory')} value={form.subcategory} onChange={(e) => set('subcategory', e.target.value)}>
@@ -148,7 +150,15 @@ export default function SuggestEditPage() {
               {subs.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
+          )}
         </div>
+
+        {needsNote(form.category, form.subcategory) && (
+          <div>
+            <label className={label}>What kind of business is it?</label>
+            <input className={input} style={changed('category_note')} maxLength={60} value={form.category_note} onChange={(e) => set('category_note', e.target.value)} placeholder="Seamstress, tattoo studio, farm" />
+          </div>
+        )}
 
         <div>
           <label className={label}>Description</label>

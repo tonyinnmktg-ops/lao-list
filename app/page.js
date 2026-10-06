@@ -3,12 +3,13 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../lib/supabase'
-import { CATEGORIES, categoryHref } from '../lib/categories'
+import { CATEGORIES, OTHER, categoryHref } from '../lib/categories'
 import BusinessCard from './components/BusinessCard'
 import FAQSection from './components/FAQSection'
 import { METROS, getMetro, inMetro, cityKey } from '../lib/metros'
 
 const GREEN = '#2d5a3d'
+const HOME_CATEGORY_COUNT = 8
 
 export default function Home() {
   return (
@@ -38,6 +39,7 @@ function HomeInner() {
   const [businesses, setBusinesses] = useState([])
   const [loading, setLoading] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [showAllCategories, setShowAllCategories] = useState(false)
 
   useEffect(() => setSearchInput(q), [q])
 
@@ -168,6 +170,12 @@ function HomeInner() {
   const activeFilterCount =
     (category ? 1 : 0) + (state ? 1 : 0) + (metro ? 1 : 0) + (city ? 1 : 0) + subs.length
 
+  // Home grid: categories with the most listings first; "Other" only appears in filters
+  const sortedCategories = CATEGORIES.filter((c) => c.value !== OTHER)
+    .map((c, i) => ({ ...c, i }))
+    .sort((a, b) => (counts[b.value] || 0) - (counts[a.value] || 0) || a.i - b.i)
+  const homeCategories = showAllCategories ? sortedCategories : sortedCategories.slice(0, HOME_CATEGORY_COUNT)
+
   const heading = [
     (subs.length && subs.length <= 2 ? subs.join(' & ') : '') || category || (q ? `Results for “${q}”` : 'Lao businesses'),
     city ? `in ${city.split(', ')[0]}` : metro ? `in ${metro.label}` : state ? `in ${state}` : '',
@@ -234,14 +242,14 @@ function HomeInner() {
             )}
 
             <Panel from="#ffffff" to="#fdf9f2" z={2}>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10">Browse by Category</h2>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                {CATEGORIES.map(({ label, value, image }) => (
+              <h2 id="categories" className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10 scroll-mt-8">Browse by Category</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {homeCategories.map(({ label, value, image, color }) => (
                   <a
                     key={value}
                     href={categoryHref(value)}
                     className="relative rounded-2xl overflow-hidden h-40 group block"
-                    style={image ? undefined : { backgroundColor: GREEN }}
+                    style={image ? undefined : { backgroundColor: color || GREEN }}
                   >
                     {image && (
                       <img
@@ -254,12 +262,21 @@ function HomeInner() {
                     <span className="absolute inset-0 flex flex-col justify-end p-4 text-white">
                       <span className="font-bold text-lg leading-tight">{label}</span>
                       {counts[value] != null && (
-                        <span className="text-xs opacity-80 mt-1">{counts[value]} listings</span>
+                        <span className="text-xs opacity-80 mt-1">{counts[value]} {counts[value] === 1 ? 'listing' : 'listings'}</span>
                       )}
                     </span>
                   </a>
                 ))}
               </div>
+              {sortedCategories.length > HOME_CATEGORY_COUNT && (
+                <button
+                  onClick={() => setShowAllCategories((v) => !v)}
+                  className="mt-6 text-sm font-medium px-5 py-2.5 rounded-full border border-gray-300 bg-white hover:bg-gray-50 transition"
+                  style={{ color: GREEN }}
+                >
+                  {showAllCategories ? 'Show fewer categories' : `Show all ${sortedCategories.length} categories`}
+                </button>
+              )}
             </Panel>
 
             <Panel from="#f8eedc" to="#f1e5cd" z={3}>
@@ -274,7 +291,7 @@ function HomeInner() {
                     <span className="block font-medium text-gray-900">{m.label}</span>
                     <span className="block text-xs text-gray-500 mt-1">
                       {m.region}
-                      {metroCounts[m.slug] ? ` · ${metroCounts[m.slug]} listings` : ''}
+                      {metroCounts[m.slug] ? ` · ${metroCounts[m.slug]} ${metroCounts[m.slug] === 1 ? 'listing' : 'listings'}` : ''}
                     </span>
                   </a>
                 ))}
@@ -293,7 +310,7 @@ function HomeInner() {
             <div className="flex items-end justify-between gap-4 mb-6">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">{heading}</h2>
-                {!loading && <p className="text-sm text-gray-500 mt-1">{visible.length} listings</p>}
+                {!loading && <p className="text-sm text-gray-500 mt-1">{visible.length} {visible.length === 1 ? 'listing' : 'listings'}</p>}
               </div>
               <button
                 onClick={() => setFiltersOpen((o) => !o)}
@@ -424,7 +441,12 @@ function HomeInner() {
                 {loading ? (
                   <p className="text-gray-400 text-center py-12">Loading...</p>
                 ) : visible.length === 0 ? (
-                  <p className="text-gray-400 text-center py-12">No businesses found.</p>
+                  <div className="text-center py-12">
+                    <p className="text-gray-500">No businesses listed here yet.</p>
+                    <a href="/submit" className="inline-block mt-4 text-sm font-semibold px-5 py-2.5 rounded-full bg-gold text-gold-ink">
+                      Know one? Add it to LaoList
+                    </a>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {visible.map((biz) => (

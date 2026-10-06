@@ -1,4 +1,4 @@
-import { fallbackImage } from '../../lib/categories'
+import { fallbackImage, typeLabel } from '../../lib/categories'
 
 const GREEN = '#2d5a3d'
 
@@ -22,11 +22,11 @@ export default function BusinessCard({ biz, badge }) {
         )}
       </div>
       <div className="p-4">
-        {biz.subcategory && (
+        {typeLabel(biz) && (
           <span
             className="inline-block text-xs font-medium px-2 py-0.5 rounded-full mb-2 bg-teal-tint text-teal-ink"
           >
-            {biz.subcategory}
+            {typeLabel(biz)}
           </span>
         )}
         <h3 className="text-base font-semibold text-gray-900">{biz.name}</h3>

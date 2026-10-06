@@ -12,8 +12,9 @@ const supabase = createClient(
 const LEGACY_CATEGORIES = {
   restaurant: 'Food & Beverage',
   nonprofit: 'Community & Faith',
-  service: 'Services',
+  service: 'Professional Services',
   retail: 'Retail',
+  Services: 'Professional Services',
 }
 
 export async function POST(req) {
@@ -47,6 +48,7 @@ try {
 Here is the submission:
 - Name: ${submission.name}
 - Category: ${submission.category}
+- Subcategory: ${submission.subcategory || ''}${submission.category_note ? ` (described as: ${submission.category_note})` : ''}
 - Description: ${submission.description}
 - City: ${submission.city}
 - State: ${submission.state}
@@ -75,6 +77,7 @@ NOTES: your brief reasoning`
       name: submission.name,
       category: LEGACY_CATEGORIES[submission.category] || submission.category,
       subcategory: submission.subcategory || null,
+      category_note: submission.category_note || null,
       description: submission.description,
       address: submission.address,
       formatted_address: [submission.address, submission.city, [submission.state, submission.zip].filter(Boolean).join(' ')]
