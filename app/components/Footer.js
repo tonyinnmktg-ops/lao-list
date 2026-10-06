@@ -45,7 +45,7 @@ export default function Footer() {
       <div className="max-w-5xl mx-auto mt-10 pt-6 border-t border-white border-opacity-20 text-xs text-white">
         <p className="opacity-50 leading-relaxed max-w-3xl mb-4">
           Disclaimer: LaoList is a community-maintained directory. Listing details come from public sources and community
-          submissions; LaoList does not own this information and cannot guarantee that it is accurate or current. Please
+          submissions; LaoList does not own this information and cannot guarantee that it is accurate or current. LaoList does not sell listing data or any information you submit. Please
           confirm details directly with each business. Business owners may request that their listing be updated or removed
           at any time by emailing{' '}
           <a href="mailto:laolistapp@gmail.com" className="underline underline-offset-2">laolistapp@gmail.com</a>.
