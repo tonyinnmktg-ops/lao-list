@@ -1,5 +1,4 @@
-import { typeLabel } from '../../lib/categories'
-import ListingPlaceholder from './ListingPlaceholder'
+import { fallbackImage, typeLabel } from '../../lib/categories'
 
 const GREEN = '#2d5a3d'
 
@@ -10,14 +9,12 @@ export default function BusinessCard({ biz, badge }) {
       className="bg-white rounded-xl overflow-hidden border border-gray-100 block hover:shadow-md transition"
     >
       <div className="h-40 overflow-hidden relative">
-        {biz.photo_url ? (
-          <>
-            <img src={biz.photo_url} alt={biz.name} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black opacity-20" />
-          </>
-        ) : (
-          <ListingPlaceholder biz={biz} />
-        )}
+        <img
+          src={biz.photo_url || fallbackImage(biz.category)}
+          alt={biz.name}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black opacity-20" />
         {badge && (
           <span className="absolute top-3 left-3 bg-gold text-gold-ink text-xs font-semibold px-3 py-1 rounded-full">
             {badge}

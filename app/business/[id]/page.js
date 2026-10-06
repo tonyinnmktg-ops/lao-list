@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
 import { categoryHref, stateHref, subcategoryHref, typeLabel } from '../../../lib/categories'
 import BusinessCard from '../../components/BusinessCard'
-import ListingPlaceholder from '../../components/ListingPlaceholder'
 
 const GREEN = '#2d5a3d'
 
@@ -94,11 +93,7 @@ export default function BusinessPage() {
           />
           <div className="absolute inset-0 bg-black opacity-30" />
         </div>
-      ) : (
-        <div className="w-full h-44">
-          <ListingPlaceholder biz={business} size="banner" />
-        </div>
-      )}
+      ) : null}
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex flex-wrap gap-x-5 gap-y-2 mb-4 text-sm font-medium">
