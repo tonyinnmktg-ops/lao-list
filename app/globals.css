@@ -26,7 +26,7 @@
 /* In the base layer so Tailwind utility classes (e.g. text-white on links) can override these */
 @layer base {
   body {
-    background-color: #fcf8f0;
+    background-color: #fafaf9;
     color: #1a1a1a;
     font-family: var(--font-body), -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;

@@ -234,7 +234,7 @@ function HomeInner() {
         {!isDirectory ? (
           <div>
             {featured.length > 0 && (
-              <Panel from="#fbf3e4" to="#f5ead6" z={1}>
+              <Panel from="#f6f6f4" to="#f6f6f4" z={1}>
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10">Featured Businesses</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {featured.map((biz) => (
@@ -244,7 +244,7 @@ function HomeInner() {
               </Panel>
             )}
 
-            <Panel from="#ffffff" to="#fdf9f2" z={2}>
+            <Panel from="#ffffff" to="#ffffff" z={2}>
               <h2 id="categories" className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10 scroll-mt-8">Browse by Category</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {homeCategories.map(({ label, value, image, color }) => (
@@ -282,7 +282,7 @@ function HomeInner() {
               )}
             </Panel>
 
-            <Panel from="#f8eedc" to="#f1e5cd" z={3}>
+            <Panel from="#f6f6f4" to="#f6f6f4" z={3}>
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10">Browse by Metro Area</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {METROS.map((m) => (
@@ -301,7 +301,7 @@ function HomeInner() {
               </div>
             </Panel>
 
-            <Panel from="#ffffff" to="#fcf8f0" z={4}>
+            <Panel from="#ffffff" to="#ffffff" z={4}>
               <FAQSection />
             </Panel>
           </div>
