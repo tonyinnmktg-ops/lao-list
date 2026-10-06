@@ -18,9 +18,20 @@ const inter = Inter({
   display: "swap",
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
+
+const title = "LaoList | Lao-Owned Businesses in the US";
+const description = "A free community directory of Lao-owned and Lao-inspired businesses and organizations across the United States.";
+
+// Share preview image comes from app/opengraph-image.jpg and app/twitter-image.jpg
 export const metadata: Metadata = {
-  title: "LaoList | Lao-Owned & Lao-Inspired Businesses",
-  description: "A free community directory of Lao-owned and Lao-inspired businesses and organizations across the United States.",
+  metadataBase: new URL(siteUrl),
+  title,
+  description,
+  openGraph: { title, description, siteName: "LaoList", type: "website" },
+  twitter: { card: "summary_large_image", title, description },
 };
 
 export default function RootLayout({
