@@ -135,7 +135,7 @@ export default function BusinessPage() {
               </div>
             </div>
             {business.is_lao_owned && (
-              <span className="bg-maroon-tint text-maroon-ink text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap shrink-0">
+              <span className="bg-lao-red text-white text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap shrink-0">
                 Lao Owned
               </span>
             )}

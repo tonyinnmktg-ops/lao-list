@@ -7,7 +7,7 @@
 }
 
 /* LaoList palette. Green and cream lead; accents each carry one meaning:
-   gold = featured / primary action, maroon = Lao-owned, teal = subcategory tags, saffron = active state */
+   gold = featured / primary action, bright red = Lao-owned, teal = subcategory tags, saffron = active state */
 @theme {
   --color-leaf: #2d5a3d;
   --color-leaf-tint: #eaf3ec;
@@ -16,6 +16,7 @@
   --color-maroon: #8a2432;
   --color-maroon-tint: #f7e4e6;
   --color-maroon-ink: #6b1a25;
+  --color-lao-red: #d7322b; /* Lao Owned badge */
   --color-teal: #2f8f8a;
   --color-teal-tint: #e3f1ef;
   --color-teal-ink: #1d5c58;
