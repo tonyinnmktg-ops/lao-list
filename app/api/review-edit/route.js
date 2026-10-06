@@ -2,7 +2,8 @@ const Anthropic = require('@anthropic-ai/sdk').default
 const { createClient } = require('@supabase/supabase-js')
 
 // Screens a suggested listing edit for spam, then emails the team.
-// It never changes the live listing: approved edits are applied by hand with
+// It never approves or changes the live listing. Edits that pass screening stay 'pending'
+// with a note; a person reviews them and applies the good ones by hand with
 //   select apply_listing_edit('<edit id>');
 
 const LABELS = {
@@ -34,7 +35,8 @@ export async function POST(req) {
   if (edit.mark_closed) lines.push('- Reported as PERMANENTLY CLOSED')
   const summary = lines.join('\n') || '(no field changes)'
 
-  let decision = 'approved'
+  // 'pending' = passed screening, waiting on a person; 'spam' = filtered out
+  let decision = 'pending'
   let notes = ''
   try {
     const message = await anthropic.messages.create({
@@ -58,11 +60,10 @@ NOTES: one short sentence`,
       }],
     })
     const text = message.content[0].text
-    decision = text.includes('DECISION: spam') ? 'spam' : 'approved'
-    notes = text.split('NOTES:')[1]?.trim() || ''
+    decision = text.includes('DECISION: spam') ? 'spam' : 'pending'
+    notes = 'Screening: ' + (text.split('NOTES:')[1]?.trim() || 'looks ok')
   } catch (err) {
-    // If screening fails, leave it for a person to look at
-    decision = 'pending'
+    // If screening fails, it still waits for a person to look at it
     notes = 'Automatic screening failed: ' + (err?.message || 'unknown error')
   }
 
