@@ -42,6 +42,10 @@ try {
   if (error || !submission) {
     return Response.json({ error: 'Submission not found' }, { status: 404 })
   }
+  // Only review fresh submissions, so a retried webhook can't add the same business twice
+  if (submission.review_status !== 'pending' || submission.review_notes) {
+    return Response.json({ decision: submission.review_status })
+  }
 
   const prompt = `You are reviewing a business submission for LaoList, a directory of Lao-owned and Lao-inspired businesses in the United States.
 
@@ -62,13 +66,23 @@ Respond in this exact format:
 DECISION: approved or rejected
 NOTES: your brief reasoning`
 
-  const message = await anthropic.messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 256,
-    messages: [{ role: 'user', content: prompt }]
-  })
+  let response
+  try {
+    const message = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 256,
+      messages: [{ role: 'user', content: prompt }]
+    })
+    response = message.content[0].text
+  } catch (err) {
+    // Leave it pending with a note so a person can review it by hand
+    await supabase
+      .from('submissions')
+      .update({ review_notes: 'Automatic review failed: ' + (err?.message || 'unknown error') })
+      .eq('id', submissionId)
+    return Response.json({ decision: 'pending' })
+  }
 
-  const response = message.content[0].text
   const decision = response.includes('DECISION: approved') ? 'approved' : 'rejected'
   const notes = response.split('NOTES:')[1]?.trim() || ''
 

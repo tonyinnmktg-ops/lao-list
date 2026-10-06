@@ -25,6 +25,7 @@ export default function SubmitPage() {
   })
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target
@@ -37,6 +38,7 @@ export default function SubmitPage() {
   async function handleSubmit(e) {
     e.preventDefault()
     setLoading(true)
+    setError('')
     const { error } = await supabase.from('submissions').insert([{
       ...form,
       subcategory: form.category === OTHER ? null : form.subcategory,
@@ -44,7 +46,8 @@ export default function SubmitPage() {
       review_status: 'pending',
       status: 'active'
     }])
-    if (!error) setSubmitted(true)
+    if (error) setError('Something went wrong sending your submission. Please try again, or email laolistapp@gmail.com.')
+    else setSubmitted(true)
     setLoading(false)
   }
 
@@ -187,6 +190,8 @@ export default function SubmitPage() {
             <input name="is_lao_owned" type="checkbox" defaultChecked onChange={handleChange} className="w-4 h-4 accent-green-700" />
             <span className="text-sm text-gray-700">This is a Lao-owned or Lao-inspired business</span>
           </label>
+
+          {error && <p className="text-sm text-red-700" role="alert">{error}</p>}
 
           <button
             type="submit"
