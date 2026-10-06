@@ -44,3 +44,10 @@
     text-decoration: none;
   }
 }
+
+/* Home page: the footer overlaps the last stacked panel like the panels overlap each other */
+main:has(.panel-stack) + footer {
+  margin-top: -2.5rem;
+  position: relative;
+  z-index: 10;
+}

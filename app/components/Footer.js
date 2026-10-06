@@ -36,7 +36,7 @@ export default function Footer() {
           <h3 className="font-semibold mb-3 text-sm uppercase tracking-wide opacity-70">Contact</h3>
           <p className="text-sm opacity-80 leading-relaxed">
             For more information, email{' '}
-            <a href="mailto:laolistapp@gmail.com" className="underline underline-offset-2 hover:opacity-100 break-all">laolistapp@gmail.com</a>
+            <a href="mailto:laolistapp@gmail.com" className="underline underline-offset-2 hover:opacity-100 whitespace-nowrap">laolistapp@gmail.com</a>
           </p>
         </div>
 

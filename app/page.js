@@ -232,7 +232,7 @@ function HomeInner() {
 
       <div className={isDirectory ? "max-w-6xl mx-auto px-6 py-8" : ""}>
         {!isDirectory ? (
-          <div>
+          <div className="panel-stack">
             {featured.length > 0 && (
               <Panel from="#f6f6f4" to="#f6f6f4" z={1}>
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10">Featured Businesses</h2>
