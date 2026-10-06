@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
 import { categoryHref, stateHref, subcategoryHref, typeLabel } from '../../../lib/categories'
 import BusinessCard from '../../components/BusinessCard'
+import ListingPlaceholder from '../../components/ListingPlaceholder'
 
 const GREEN = '#2d5a3d'
 
@@ -84,7 +85,7 @@ export default function BusinessPage() {
 
   return (
     <main>
-      {business.photo_url && (
+      {business.photo_url ? (
         <div className="w-full h-64 overflow-hidden relative">
           <img
             src={business.photo_url.replace('w408', 'w1200')}
@@ -92,6 +93,10 @@ export default function BusinessPage() {
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black opacity-30" />
+        </div>
+      ) : (
+        <div className="w-full h-44">
+          <ListingPlaceholder biz={business} size="banner" />
         </div>
       )}
 
