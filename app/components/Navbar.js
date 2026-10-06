@@ -1,8 +1,16 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export default function Navbar() {
+  // On the home page the navbar is transparent and sits on the hero, so the textile runs to the top
+  const isHome = usePathname() === '/'
   return (
-    <nav style={{ backgroundColor: '#2d5a3d' }} className="px-6 py-4 flex items-center justify-between">
+    <nav
+      style={{ backgroundColor: isHome ? 'transparent' : '#2d5a3d' }}
+      className={'px-6 py-4 flex items-center justify-between h-[72px] ' + (isHome ? 'absolute top-0 inset-x-0 z-20' : 'relative')}
+    >
       <a href="/" className="font-display text-2xl font-semibold text-white tracking-tight">
         LaoList
       </a>

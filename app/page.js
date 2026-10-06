@@ -188,7 +188,7 @@ function HomeInner() {
 
   return (
     <main>
-      <div style={{ backgroundColor: GREEN }} className={"relative overflow-hidden px-6 text-center " + (isDirectory ? "py-16" : "pt-16 pb-28")}>
+      <div style={{ backgroundColor: GREEN }} className={"relative overflow-hidden px-6 text-center " + (isDirectory ? "py-16" : "pt-[136px] pb-28")}>
         {/* Lao textile (sinh weave) as a white texture under the green; screen blend drops the dark threads */}
         <div
           aria-hidden
@@ -199,8 +199,10 @@ function HomeInner() {
             backgroundPosition: 'center top',
             mixBlendMode: 'screen',
             opacity: 0.16,
-            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0, #000 48px)',
-            maskImage: 'linear-gradient(to bottom, transparent 0, #000 48px)',
+            ...(isDirectory && {
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0, #000 48px)',
+              maskImage: 'linear-gradient(to bottom, transparent 0, #000 48px)',
+            }),
           }}
         />
         <div className="relative">
