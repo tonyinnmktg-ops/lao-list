@@ -31,7 +31,7 @@ export default function BusinessCard({ biz, badge }) {
         )}
         <h3 className="text-base font-semibold text-gray-900">{biz.name}</h3>
         <p className="text-sm text-gray-500 mt-1">
-          {biz.category} · {[biz.city, biz.state].filter(Boolean).join(', ')}
+          {biz.category} · {[biz.city, biz.state].filter(Boolean).join(', ') || 'Nationwide'}
         </p>
         {biz.rating && <p className="text-sm text-gray-600 mt-1"><span className="text-gold">★</span> {biz.rating}</p>}
         {biz.description && (
