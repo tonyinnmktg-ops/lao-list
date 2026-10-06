@@ -179,7 +179,7 @@ export default function BusinessPage() {
           </div>
         </div>
 
-        <p className="text-sm text-gray-500 mt-4">
+        <p className="text-sm text-gray-500 mt-4 text-right">
           Something wrong or missing?{' '}
           <a href={'/business/' + business.id + '/edit'} className="font-medium hover:underline" style={{ color: GREEN }}>
             Suggest an edit
