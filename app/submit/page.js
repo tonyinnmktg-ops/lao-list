@@ -37,8 +37,13 @@ export default function SubmitPage() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setLoading(true)
     setError('')
+    // Guardrail: a listing needs a place to visit or a link to find it online
+    if (![form.address, form.website, form.instagram, form.facebook].some((v) => v.trim())) {
+      setError('Please add a street address, or a website or social link if the business is online only.')
+      return
+    }
+    setLoading(true)
     const { error } = await supabase.from('submissions').insert([{
       ...form,
       subcategory: form.category === OTHER ? null : form.subcategory,
@@ -139,8 +144,8 @@ export default function SubmitPage() {
               <input name="city" onChange={handleChange} className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>State</label>
-              <select name="state" value={form.state} onChange={handleChange} className={inputClass}>
+              <label className={labelClass}>State *</label>
+              <select name="state" required value={form.state} onChange={handleChange} className={inputClass}>
                 <option value="">Select a state</option>
                 {US_STATES.map((st) => (
                   <option key={st} value={st}>{st}</option>
@@ -153,6 +158,7 @@ export default function SubmitPage() {
             <div>
               <label className={labelClass}>Street Address</label>
               <input name="address" onChange={handleChange} className={inputClass} />
+              <p className="text-xs text-gray-400 mt-1">Online only? Leave this blank and add a website or social link below.</p>
             </div>
             <div>
               <label className={labelClass}>Zip Code</label>
