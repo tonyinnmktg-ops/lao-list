@@ -52,6 +52,10 @@ export async function POST(req) {
   const listing = {}
   TEXT_FIELDS.forEach((k) => { listing[k] = clean(submission[k]) })
   listing.category = LEGACY_CATEGORIES[listing.category] || listing.category
+  listing.website = toUrl(listing.website)
+  listing.facebook = listing.facebook && !/^https?:\/\//i.test(listing.facebook)
+    ? (/facebook\.com/i.test(listing.facebook) ? toUrl(listing.facebook) : 'https://www.facebook.com/' + listing.facebook.replace(/^@/, ''))
+    : listing.facebook
   listing.is_lao_owned = submission.is_lao_owned
 
   // 2. Enrich
@@ -90,6 +94,7 @@ Submission:
 - Submitter Email: ${submission.submitter_email}
 ${google ? `\nGoogle Maps found a matching place: ${google.name}, ${google.formatted_address}${google.types?.length ? ` (types: ${google.types.join(', ')})` : ''}\n` : ''}
 Approve if it looks like a real, legitimate business or organization with a connection to the Lao community. Reject if it looks like spam, a test, is missing a name or category, or has no apparent connection to the Lao community.
+Do not reject because an address, city, phone or other detail is missing: online-only businesses, consultants and organizations are welcome, and completeness is checked separately.
 
 Also write a listing description: one or two plain sentences saying what the business is and where. Use only the facts above; do not invent menu items, services, history or claims. Keep any useful detail the submitter gave (for example a former name).
 
@@ -212,6 +217,12 @@ async function findOnGoogle(listing) {
     }
   }
   return null
+}
+
+// Adds https:// to bare domains like www.example.com
+function toUrl(v) {
+  if (!v) return v
+  return /^https?:\/\//i.test(v) ? v : 'https://' + v.replace(/^\/+/, '')
 }
 
 // True when most of the distinctive words in the shorter name appear in the other

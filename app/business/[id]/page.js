@@ -158,7 +158,7 @@ export default function BusinessPage() {
             )}
             {business.website && (
               <Row label="Website">
-                <a href={business.website} target="_blank" rel="noopener" style={{ color: GREEN }} className="hover:underline text-sm break-all">{business.website}</a>
+                <a href={toUrl(business.website)} target="_blank" rel="noopener" style={{ color: GREEN }} className="hover:underline text-sm break-all">{business.website}</a>
               </Row>
             )}
             {mapsUrl && (
@@ -173,7 +173,7 @@ export default function BusinessPage() {
             )}
             {business.facebook && (
               <Row label="Facebook">
-                <a href={business.facebook} target="_blank" rel="noopener" style={{ color: GREEN }} className="hover:underline text-sm break-all">{business.facebook}</a>
+                <a href={facebookUrl(business.facebook)} target="_blank" rel="noopener" style={{ color: GREEN }} className="hover:underline text-sm break-all">{business.facebook}</a>
               </Row>
             )}
           </div>
@@ -211,6 +211,16 @@ export default function BusinessPage() {
       )}
     </main>
   )
+}
+
+// Links saved without https:// (e.g. www.example.com) would otherwise open as pages on this site
+function toUrl(v) {
+  return /^https?:\/\//i.test(v) ? v : 'https://' + v.replace(/^\/+/, '')
+}
+
+function facebookUrl(v) {
+  if (/^https?:\/\//i.test(v) || /facebook\.com/i.test(v)) return toUrl(v)
+  return 'https://www.facebook.com/' + v.replace(/^@/, '')
 }
 
 function Row({ label, children }) {
