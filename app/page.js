@@ -420,7 +420,7 @@ function HomeInner() {
               </div>
               <button
                 onClick={() => setFiltersOpen((o) => !o)}
-                className="md:hidden text-sm px-4 py-2 rounded-full border border-gray-200 bg-white font-medium"
+                className="md:hidden text-sm px-4 py-2 rounded-full border border-gray-200 bg-white font-medium whitespace-nowrap"
                 style={{ color: GREEN }}
               >
                 Filters{activeFilterCount ? ` (${activeFilterCount})` : ''}
