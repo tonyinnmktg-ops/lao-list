@@ -7,7 +7,7 @@ const GREEN = '#2d5a3d'
 
 const STEPS = [
   {
-    text: 'Search by name, dish, city or category',
+    text: 'Find Lao businesses by name, dish, city or category',
     icon: (
       <>
         <circle cx="21" cy="21" r="11" />
@@ -16,26 +16,25 @@ const STEPS = [
     ),
   },
   {
-    text: 'Browse your metro area, from the Twin Cities to the Central Valley',
+    text: 'Discover festivals, pop-ups and temple events near you',
     icon: (
       <>
-        <path d="M24 42s-13-12.5-13-23a13 13 0 0126 0c0 10.5-13 23-13 23z" />
-        <circle cx="24" cy="19" r="5" />
+        <rect x="8" y="11" width="32" height="29" rx="3" />
+        <path d="M8 19h32M16 7v8M32 7v8" />
+        <path d="M17 28h4M27 28h4M17 34h4" />
       </>
     ),
   },
   {
-    text: 'Discover nearby spots similar to the ones you love',
+    text: 'Get help with scholarships, legal questions and health care',
     icon: (
       <>
-        <path d="M7 24h34a17 17 0 01-34 0z" />
-        <path d="M18 17c0-3 3-3 3-6M25 17c0-3 3-3 3-6" />
-        <path d="M14 41h20" />
+        <path d="M24 40s-15-8.5-15-19a8 8 0 0115-4 8 8 0 0115 4c0 10.5-15 19-15 19z" />
       </>
     ),
   },
   {
-    text: 'Add a business and help grow the directory',
+    text: 'Add a business or event and help LaoList grow',
     icon: (
       <>
         <circle cx="24" cy="24" r="17" />
@@ -73,8 +72,9 @@ export default function FAQSection() {
         </h2>
         <p className="text-gray-600 leading-relaxed">
           LaoList helps you find Lao-owned and Lao-inspired businesses across the United States, from family
-          restaurants serving khao piak and larb to markets, nonprofits and temples. Browse more than 300 listings by
-          category, metro area or city, and help the directory grow by adding the places you love.
+          restaurants serving khao piak and larb to markets, nonprofits and temples. Find community events from
+          Boun Ok Phansa to night markets, get help through scholarships and legal and health resources, and help
+          LaoList grow by adding the places and events you love.
         </p>
       </div>
 
