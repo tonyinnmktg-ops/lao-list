@@ -39,7 +39,10 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-3 text-sm uppercase tracking-wide opacity-70">Community</h3>
           <ul className="flex flex-col gap-2 text-sm opacity-80">
+            <li><Link href="/events" className="hover:opacity-100">Events</Link></li>
+            <li><Link href="/resources" className="hover:opacity-100">Resources</Link></li>
             <li><Link href="/submit" className="hover:opacity-100">Submit a Business</Link></li>
+            <li><Link href="/events/submit" className="hover:opacity-100">Submit an Event</Link></li>
           </ul>
         </div>
 

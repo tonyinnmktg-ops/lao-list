@@ -14,9 +14,15 @@ export default function Navbar() {
       <a href="/" className="font-display text-2xl font-semibold text-white tracking-tight">
         LaoList
       </a>
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4 sm:gap-6">
         <a href="/directory" style={{ color: 'white' }} className="hidden sm:inline text-sm font-medium hover:opacity-80 transition">
           Directory
+        </a>
+        <a href="/events" style={{ color: 'white' }} className="text-sm font-medium hover:opacity-80 transition">
+          Events
+        </a>
+        <a href="/resources" style={{ color: 'white' }} className="hidden sm:inline text-sm font-medium hover:opacity-80 transition">
+          Resources
         </a>
         <Link href="/submit" className="bg-gold text-gold-ink text-sm font-semibold px-4 py-2 rounded-full hover:opacity-90 transition">
           Submit a Business

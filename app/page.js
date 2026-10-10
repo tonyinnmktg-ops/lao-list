@@ -6,6 +6,8 @@ import { supabase } from '../lib/supabase'
 import { CATEGORIES, OTHER, categoryHref } from '../lib/categories'
 import BusinessCard from './components/BusinessCard'
 import FAQSection from './components/FAQSection'
+import EventCard from './components/EventCard'
+import { upcomingFilter } from '../lib/events'
 import { METROS, getMetro, inMetro, cityKey } from '../lib/metros'
 
 const GREEN = '#2d5a3d'
@@ -35,6 +37,7 @@ function HomeInner() {
 
   const [searchInput, setSearchInput] = useState(q)
   const [featured, setFeatured] = useState([])
+  const [upcoming, setUpcoming] = useState([])
   const [counts, setCounts] = useState({})
   const [metroCounts, setMetroCounts] = useState({})
   const [states, setStates] = useState([])
@@ -48,6 +51,14 @@ function HomeInner() {
   // One-time: featured, category counts, state list
   useEffect(() => {
     fetchFeatured()
+    supabase
+      .from('events')
+      .select('*')
+      .eq('status', 'active')
+      .or(upcomingFilter())
+      .order('start_date', { ascending: true })
+      .limit(4)
+      .then(({ data }) => setUpcoming(data || []))
     supabase
       .from('businesses')
       .select('category, state, city')
@@ -303,7 +314,19 @@ function HomeInner() {
               </div>
             </Panel>
 
-            <Panel from="#ffffff" to="#ffffff" z={4}>
+            {upcoming.length > 0 && (
+              <Panel from="#ffffff" to="#ffffff" z={4}>
+                <div className="flex items-baseline justify-between gap-4 mb-8 md:mb-10">
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">Upcoming Events</h2>
+                  <a href="/events" className="text-sm font-medium whitespace-nowrap" style={{ color: GREEN }}>See all events →</a>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {upcoming.map((e) => <EventCard key={e.id} event={e} />)}
+                </div>
+              </Panel>
+            )}
+
+            <Panel from={upcoming.length > 0 ? '#f6f6f4' : '#ffffff'} to={upcoming.length > 0 ? '#f6f6f4' : '#ffffff'} z={5}>
               <FAQSection />
             </Panel>
           </div>
