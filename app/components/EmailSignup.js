@@ -6,6 +6,7 @@ import { US_STATES } from '../../lib/states'
 
 // Monthly email signup. Stored in the subscribers table; visitors can add an email but never read the list.
 export default function EmailSignup({ source = 'footer' }) {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [state, setState] = useState('')
   const [company, setCompany] = useState('') // honeypot: hidden from people, bots fill it
@@ -16,6 +17,7 @@ export default function EmailSignup({ source = 'footer' }) {
     if (company) return setStatus('done')
     setStatus('sending')
     const { error } = await supabase.from('subscribers').insert([{
+      name: name.trim().replace(/\s+/g, ' ') || null,
       email: email.trim().toLowerCase(),
       state: state || null,
       source,
@@ -27,14 +29,25 @@ export default function EmailSignup({ source = 'footer' }) {
   if (status === 'done') {
     return (
       <p className="text-sm text-white/90" role="status">
-        You're on the list. Look out for our next email. Khop jai! 🙏
+        {name.trim() ? `Thanks, ${name.trim().split(' ')[0]}! ` : ''}You're on the list. Look out for our next email. Khop jai! 🙏
       </p>
     )
   }
 
   const field = 'rounded-full px-4 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-gold'
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 w-full">
+    <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
+      <label className="sr-only" htmlFor={`signup-name-${source}`}>Your name</label>
+      <input
+        id={`signup-name-${source}`}
+        type="text"
+        required
+        autoComplete="given-name"
+        placeholder="Your name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className={field + ' min-w-0'}
+      />
       <label className="sr-only" htmlFor={`signup-email-${source}`}>Email address</label>
       <input
         id={`signup-email-${source}`}
@@ -43,14 +56,15 @@ export default function EmailSignup({ source = 'footer' }) {
         placeholder="Your email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className={field + ' flex-1 min-w-0'}
+        autoComplete="email"
+        className={field + ' min-w-0'}
       />
       <label className="sr-only" htmlFor={`signup-state-${source}`}>State (optional)</label>
       <select
         id={`signup-state-${source}`}
         value={state}
         onChange={(e) => setState(e.target.value)}
-        className={field + ' sm:w-40'}
+        className={field}
       >
         <option value="">State (optional)</option>
         {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -72,7 +86,7 @@ export default function EmailSignup({ source = 'footer' }) {
         {status === 'sending' ? 'Signing up…' : 'Sign up'}
       </button>
       {status === 'error' && (
-        <p className="text-sm text-white/90 sm:basis-full" role="alert">Something went wrong. Please try again.</p>
+        <p className="text-sm text-white/90 sm:col-span-2" role="alert">Something went wrong. Please try again.</p>
       )}
     </form>
   )

@@ -8,6 +8,13 @@ import BusinessCard from './components/BusinessCard'
 import FAQSection from './components/FAQSection'
 import EventCard from './components/EventCard'
 import { upcomingFilter } from '../lib/events'
+import EmailSignup from './components/EmailSignup'
+
+const RESOURCE_ANCHORS = {
+  'Scholarships & Education': 'education',
+  'Legal & Immigration': 'legal',
+  'Health & Mental Health': 'health',
+}
 import { METROS, getMetro, inMetro, cityKey } from '../lib/metros'
 
 const GREEN = '#2d5a3d'
@@ -38,6 +45,9 @@ function HomeInner() {
   const [searchInput, setSearchInput] = useState(q)
   const [featured, setFeatured] = useState([])
   const [upcoming, setUpcoming] = useState([])
+  const [upcomingCount, setUpcomingCount] = useState(null)
+  const [resourceHighlights, setResourceHighlights] = useState([])
+  const [resourceCount, setResourceCount] = useState(null)
   const [counts, setCounts] = useState({})
   const [metroCounts, setMetroCounts] = useState({})
   const [states, setStates] = useState([])
@@ -59,6 +69,23 @@ function HomeInner() {
       .order('start_date', { ascending: true })
       .limit(4)
       .then(({ data }) => setUpcoming(data || []))
+    supabase
+      .from('events')
+      .select('id')
+      .eq('status', 'active')
+      .or(upcomingFilter())
+      .then(({ data }) => setUpcomingCount(data ? data.length : null))
+    // One highlight per resource section: the top-sorted entry in each
+    supabase
+      .from('resources')
+      .select('id, title, category, description, sort')
+      .eq('status', 'active')
+      .order('sort', { ascending: true })
+      .then(({ data }) => {
+        if (!data) return
+        setResourceCount(data.length)
+        setResourceHighlights(Object.keys(RESOURCE_ANCHORS).map((c) => data.find((r) => r.category === c)).filter(Boolean))
+      })
     supabase
       .from('businesses')
       .select('category, state, city')
@@ -188,6 +215,7 @@ function HomeInner() {
   const sortedCategories = CATEGORIES.filter((c) => c.value !== OTHER)
     .map((c, i) => ({ ...c, i }))
     .sort((a, b) => (counts[b.value] || 0) - (counts[a.value] || 0) || a.i - b.i)
+  const totalBusinesses = Object.values(counts).reduce((a, b) => a + b, 0) || null
   const homeCategories = showAllCategories ? sortedCategories : sortedCategories.slice(0, HOME_CATEGORY_COUNT)
 
   const heading = [
@@ -222,7 +250,7 @@ function HomeInner() {
           <span className="block">Community <span className="text-gold">grown.</span></span>
         </h1>
         <p className="text-white/80 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-10">
-          From family kitchens to neighborhood markets, find Lao businesses across America. Made by the community, for the community.
+          From family kitchens to temple festivals, find Lao businesses, events and resources across America. Made by the community, for the community.
         </p>
         <form onSubmit={handleSearch} className="max-w-xl mx-auto flex gap-2">
           <input
@@ -240,15 +268,45 @@ function HomeInner() {
             Search
           </button>
         </form>
+        {!isDirectory && (
+          <nav className="flex flex-wrap justify-center gap-2 mt-6" aria-label="Explore LaoList">
+            {[
+              { href: '/directory', label: 'Businesses', count: totalBusinesses },
+              { href: '/events', label: 'Events', count: upcomingCount },
+              { href: '/resources', label: 'Resources', count: resourceCount },
+            ].map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                style={{ color: 'white' }}
+                className="text-sm font-medium px-4 py-2 rounded-full border border-white/30 bg-white/10 hover:bg-white/20 transition"
+              >
+                {l.label}{l.count ? <span className="text-white/60"> · {l.count}</span> : null}
+              </a>
+            ))}
+          </nav>
+        )}
         </div>
       </div>
 
       <div className={isDirectory ? "max-w-6xl mx-auto px-6 py-8" : ""}>
         {!isDirectory ? (
           <div className="panel-stack">
-            {featured.length > 0 && (
+            {upcoming.length > 0 && (
               <Panel from="#f6f6f4" to="#f6f6f4" z={1}>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10">Featured Businesses</h2>
+                <SectionHead title="Upcoming Events" href="/events" link="See all events" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {upcoming.map((e) => <EventCard key={e.id} event={e} />)}
+                </div>
+                <p className="text-sm text-gray-500 mt-6">
+                  Hosting something? <a href="/events/submit" className="font-medium hover:underline" style={{ color: GREEN }}>Add your event</a>, it's free.
+                </p>
+              </Panel>
+            )}
+
+            {featured.length > 0 && (
+              <Panel from="#ffffff" to="#ffffff" z={2}>
+                <SectionHead title="Featured Businesses" href="/directory" link="See all businesses" />
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {featured.map((biz) => (
                     <BusinessCard key={biz.id} biz={biz} badge="Featured" />
@@ -257,8 +315,8 @@ function HomeInner() {
               </Panel>
             )}
 
-            <Panel from="#ffffff" to="#ffffff" z={2}>
-              <h2 id="categories" className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10 scroll-mt-8">Browse by Category</h2>
+            <Panel from="#f6f6f4" to="#f6f6f4" z={3}>
+              <h2 id="categories" className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10 scroll-mt-8">Browse Businesses by Category</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {homeCategories.map(({ label, value, image, color }) => (
                   <a
@@ -293,40 +351,60 @@ function HomeInner() {
                   {showAllCategories ? 'Show fewer categories' : `Show all ${sortedCategories.length} categories`}
                 </button>
               )}
-            </Panel>
 
-            <Panel from="#f6f6f4" to="#f6f6f4" z={3}>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-8 md:mb-10">Browse by Metro Area</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <h3 className="text-lg font-semibold text-gray-900 mt-12 mb-4">Or browse by metro area</h3>
+              <div className="flex flex-wrap gap-2">
                 {METROS.map((m) => (
                   <a
                     key={m.slug}
                     href={'/?metro=' + m.slug}
-                    className="px-5 py-4 bg-white border border-gray-100 rounded-xl hover:shadow-md hover:border-gray-200 transition block"
+                    className="text-sm px-4 py-2 rounded-full border border-gray-200 bg-white text-gray-800 hover:border-gray-300 hover:shadow-sm transition"
                   >
-                    <span className="block font-medium text-gray-900">{m.label}</span>
-                    <span className="block text-xs text-gray-500 mt-1">
-                      {m.region}
-                      {metroCounts[m.slug] ? ` · ${metroCounts[m.slug]} ${metroCounts[m.slug] === 1 ? 'listing' : 'listings'}` : ''}
-                    </span>
+                    {m.label}
+                    {metroCounts[m.slug] ? <span className="text-gray-400"> · {metroCounts[m.slug]}</span> : null}
                   </a>
                 ))}
               </div>
             </Panel>
 
-            {upcoming.length > 0 && (
+            {resourceHighlights.length > 0 && (
               <Panel from="#ffffff" to="#ffffff" z={4}>
-                <div className="flex items-baseline justify-between gap-4 mb-8 md:mb-10">
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">Upcoming Events</h2>
-                  <a href="/events" className="text-sm font-medium whitespace-nowrap" style={{ color: GREEN }}>See all events →</a>
+                <SectionHead title="Community Resources" href="/resources" link="See all resources" />
+                <p className="text-gray-600 -mt-4 md:-mt-6 mb-8 max-w-2xl">
+                  Scholarships, legal and immigration help, and health services for Lao Americans and their families.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {resourceHighlights.map((r) => (
+                    <a
+                      key={r.id}
+                      href={'/resources#' + RESOURCE_ANCHORS[r.category]}
+                      className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md transition block"
+                    >
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-teal-tint text-teal-ink">{r.category}</span>
+                      <h3 className="text-base font-semibold text-gray-900 leading-snug mt-3">{r.title}</h3>
+                      {r.description && <p className="text-sm text-gray-600 mt-2 line-clamp-3">{r.description}</p>}
+                    </a>
+                  ))}
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {upcoming.map((e) => <EventCard key={e.id} event={e} />)}
-                </div>
+                <p className="text-sm text-gray-600 mt-6">
+                  <strong className="font-semibold">In a crisis?</strong> Call or text <a href="tel:988" className="font-semibold underline">988</a>, any time. Say "Lao" for an interpreter.
+                </p>
               </Panel>
             )}
 
-            <Panel from={upcoming.length > 0 ? '#f6f6f4' : '#ffffff'} to={upcoming.length > 0 ? '#f6f6f4' : '#ffffff'} z={5}>
+            <Panel from="#2d5a3d" to="#2d5a3d" z={5}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center text-white">
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-bold leading-tight">Stay in the loop</h2>
+                  <p className="text-white/75 mt-3 leading-relaxed">
+                    New Lao businesses, upcoming events and resources near you, in your inbox about once a month. No spam, and we never sell your email.
+                  </p>
+                </div>
+                <EmailSignup source="home" />
+              </div>
+            </Panel>
+
+            <Panel from="#ffffff" to="#ffffff" z={6}>
               <FAQSection />
             </Panel>
           </div>
@@ -504,6 +582,15 @@ function FilterGroup({ title, action, children }) {
 }
 
 // Home page section: full-width panel with rounded top corners that overlaps the one above it
+function SectionHead({ title, href, link }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 mb-8 md:mb-10">
+      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">{title}</h2>
+      <a href={href} className="text-sm font-medium whitespace-nowrap" style={{ color: GREEN }}>{link} →</a>
+    </div>
+  )
+}
+
 function Panel({ from, to, z, children }) {
   return (
     <section
