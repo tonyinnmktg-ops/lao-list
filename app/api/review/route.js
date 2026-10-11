@@ -57,6 +57,11 @@ export async function POST(req) {
     ? (/facebook\.com/i.test(listing.facebook) ? toUrl(listing.facebook) : 'https://www.facebook.com/' + listing.facebook.replace(/^@/, ''))
     : listing.facebook
   listing.is_lao_owned = submission.is_lao_owned
+  // Photos only come from our own upload route (people only)
+  const avatarPrefix = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/avatars/'
+  if (typeof submission.avatar_url === 'string' && submission.avatar_url.startsWith(avatarPrefix)) {
+    listing.avatar_url = submission.avatar_url
+  }
 
   // 2. Enrich
   let google = null
@@ -140,6 +145,7 @@ DESCRIPTION: the listing description`
   // People (content creators and artists) never get a street address or phone; content creators get no location
   const creator = ['Content Creators', 'Visual Artists', 'Performing Artists'].includes(listing.category)
   if (creator) Object.assign(listing, { address: null, zip: null, phone: null })
+  else delete listing.avatar_url
   if (listing.category === 'Content Creators') Object.assign(listing, { city: null, state: null })
   const hasLink = !!(listing.website || listing.instagram || listing.facebook || listing.tiktok || listing.youtube)
   const missing = []

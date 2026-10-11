@@ -28,6 +28,7 @@ export default function SubmitPage() {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [photo, setPhoto] = useState(null) // { file, preview }
   const creator = isCreator(form.category) // a person: content creator or artist
   const onlineOnly = isOnlineOnly(form.category)
 
@@ -59,8 +60,19 @@ export default function SubmitPage() {
       return
     }
     setLoading(true)
+    let avatar_url = null
+    if (creator && photo) {
+      try {
+        avatar_url = await uploadPhoto(photo.file)
+      } catch (err) {
+        setError(err.message || 'The photo could not be uploaded. Try another photo, or submit without one.')
+        setLoading(false)
+        return
+      }
+    }
     const { error } = await supabase.from('submissions').insert([{
       ...form,
+      avatar_url,
       // People never get a street address or phone; content creators get no location at all
       ...(creator && { address: '', zip: '', phone: '' }),
       ...(onlineOnly && { city: '', state: '' }),
@@ -72,6 +84,12 @@ export default function SubmitPage() {
     if (error) setError('Something went wrong sending your submission. Please try again, or email laolistapp@gmail.com.')
     else setSubmitted(true)
     setLoading(false)
+  }
+
+  function pickPhoto(e) {
+    const file = e.target.files?.[0]
+    if (photo) URL.revokeObjectURL(photo.preview)
+    setPhoto(file ? { file, preview: URL.createObjectURL(file) } : null)
   }
 
   if (submitted) return (
@@ -152,6 +170,31 @@ export default function SubmitPage() {
                 className={inputClass}
               />
               <p className="text-xs text-gray-400 mt-1">A few words is perfect. We use these to add new categories.</p>
+            </div>
+          )}
+
+          {creator && (
+            <div>
+              <label className={labelClass}>Photo</label>
+              <div className="flex items-center gap-4">
+                {photo ? (
+                  <img src={photo.preview} alt="" className="w-16 h-16 rounded-full object-cover border border-gray-100" />
+                ) : (
+                  <span aria-hidden className="w-16 h-16 rounded-full bg-gray-100 border border-dashed border-gray-300" />
+                )}
+                <div className="flex flex-col gap-1">
+                  <label className="cursor-pointer self-start text-sm font-medium px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50" style={{ color: '#2d5a3d' }}>
+                    {photo ? 'Change photo' : 'Choose a photo'}
+                    <input type="file" accept="image/*" onChange={pickPhoto} className="sr-only" />
+                  </label>
+                  {photo && (
+                    <button type="button" onClick={() => { URL.revokeObjectURL(photo.preview); setPhoto(null) }} className="self-start text-xs text-gray-500 hover:text-gray-700">
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 mt-2">Optional. A profile picture or headshot, shown in a circle. Only add a photo you have permission to share.</p>
             </div>
           )}
 
@@ -252,4 +295,27 @@ export default function SubmitPage() {
       </div>
     </main>
   )
+}
+
+// Shrinks the photo in the browser (phone photos are large), then uploads it.
+// The server re-crops it to a square and stores it. Returns the public URL.
+async function uploadPhoto(file) {
+  let body = file
+  try {
+    const bitmap = await createImageBitmap(file)
+    const scale = Math.min(1, 1000 / Math.min(bitmap.width, bitmap.height))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.round(bitmap.width * scale)
+    canvas.height = Math.round(bitmap.height * scale)
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+    body = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9)) || file
+  } catch {
+    // Browser can't decode it (some HEIC files): send the original and let the server try
+  }
+  const data = new FormData()
+  data.append('file', body, 'photo.jpg')
+  const res = await fetch('/api/upload-avatar', { method: 'POST', body: data })
+  const json = await res.json().catch(() => ({}))
+  if (!res.ok || !json.url) throw new Error(json.error || 'The photo could not be uploaded. Try another photo, or submit without one.')
+  return json.url
 }
