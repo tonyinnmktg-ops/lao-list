@@ -9,7 +9,7 @@ const { createClient } = require('@supabase/supabase-js')
 const LABELS = {
   name: 'Name', category: 'Category', subcategory: 'Subcategory', category_note: 'Business type note', description: 'Description',
   formatted_address: 'Address', phone: 'Phone', website: 'Website', instagram: 'Instagram',
-  facebook: 'Facebook', is_lao_owned: 'Lao owned',
+  facebook: 'Facebook', tiktok: 'TikTok', youtube: 'YouTube', is_lao_owned: 'Lao owned',
 }
 
 export async function POST(req) {

@@ -1,0 +1,37 @@
+import { typeLabel } from '../../lib/categories'
+import { PLATFORMS, socialUrl, toUrl } from '../../lib/links'
+
+const GREEN = '#2d5a3d'
+
+export default function CreatorCard({ creator }) {
+  const links = PLATFORMS.filter((p) => creator[p.key])
+  return (
+    <div className="bg-white rounded-xl border border-gray-100 p-5 flex flex-col hover:shadow-md transition">
+      {typeLabel(creator) && (
+        <span className="self-start text-xs font-medium px-2 py-0.5 rounded-full mb-2 bg-teal-tint text-teal-ink">
+          {typeLabel(creator)}
+        </span>
+      )}
+      <a href={'/business/' + creator.id} className="hover:underline">
+        <h3 className="text-lg font-semibold text-gray-900 leading-snug">{creator.name}</h3>
+      </a>
+      {creator.description && <p className="text-sm text-gray-600 mt-2 line-clamp-3 flex-1">{creator.description}</p>}
+      {links.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-4">
+          {links.map((p) => (
+            <a
+              key={p.key}
+              href={p.key === 'website' ? toUrl(creator.website) : socialUrl(p.key, creator[p.key])}
+              target="_blank"
+              rel="noopener"
+              className="text-xs font-medium px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition"
+              style={{ color: GREEN }}
+            >
+              {p.label}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../../lib/supabase'
-import { CATEGORIES, SUBCATEGORIES, OTHER, needsNote } from '../../../../lib/categories'
+import { CATEGORIES, SUBCATEGORIES, OTHER, needsNote, isCreator } from '../../../../lib/categories'
 
 const GREEN = '#2d5a3d'
-const TEXT_FIELDS = ['name', 'category', 'subcategory', 'category_note', 'description', 'formatted_address', 'phone', 'website', 'instagram', 'facebook']
+const TEXT_FIELDS = ['name', 'category', 'subcategory', 'category_note', 'description', 'formatted_address', 'phone', 'website', 'instagram', 'facebook', 'tiktok', 'youtube']
 
 function initialValues(b) {
   return {
@@ -21,6 +21,8 @@ function initialValues(b) {
     website: b.website || '',
     instagram: b.instagram || '',
     facebook: b.facebook || '',
+    tiktok: b.tiktok || '',
+    youtube: b.youtube || '',
     is_lao_owned: Boolean(b.is_lao_owned),
   }
 }
@@ -165,15 +167,27 @@ export default function SuggestEditPage() {
           <textarea rows={3} className={input} style={changed('description')} value={form.description} onChange={(e) => set('description', e.target.value)} />
         </div>
 
+        {!isCreator(form.category) && (
         <div>
           <label className={label}>Address</label>
           <input className={input} style={changed('formatted_address')} value={form.formatted_address} onChange={(e) => set('formatted_address', e.target.value)} placeholder="Street, City, State ZIP" />
         </div>
+        )}
 
         <div className="grid sm:grid-cols-2 gap-4">
+          {!isCreator(form.category) && (
           <div>
             <label className={label}>Phone</label>
             <input className={input} style={changed('phone')} value={form.phone} onChange={(e) => set('phone', e.target.value)} />
+          </div>
+          )}
+          <div>
+            <label className={label}>TikTok</label>
+            <input className={input} style={changed('tiktok')} value={form.tiktok} onChange={(e) => set('tiktok', e.target.value)} placeholder="@handle" />
+          </div>
+          <div>
+            <label className={label}>YouTube</label>
+            <input className={input} style={changed('youtube')} value={form.youtube} onChange={(e) => set('youtube', e.target.value)} placeholder="Channel link or @handle" />
           </div>
           <div>
             <label className={label}>Website</label>
@@ -191,7 +205,7 @@ export default function SuggestEditPage() {
 
         <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
           <input type="checkbox" checked={form.is_lao_owned} onChange={(e) => set('is_lao_owned', e.target.checked)} style={{ accentColor: GREEN }} className="w-4 h-4" />
-          This business is Lao-owned
+          {isCreator(form.category) ? 'This creator is Lao' : 'This business is Lao-owned'}
         </label>
 
         <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">

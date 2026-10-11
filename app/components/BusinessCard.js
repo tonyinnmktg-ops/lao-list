@@ -1,4 +1,4 @@
-import { fallbackImage, typeLabel } from '../../lib/categories'
+import { fallbackImage, typeLabel, isCreator } from '../../lib/categories'
 
 const GREEN = '#2d5a3d'
 
@@ -31,7 +31,7 @@ export default function BusinessCard({ biz, badge }) {
         )}
         <h3 className="text-base font-semibold text-gray-900">{biz.name}</h3>
         <p className="text-sm text-gray-500 mt-1">
-          {biz.category} · {[biz.city, biz.state].filter(Boolean).join(', ') || 'Nationwide'}
+          {biz.category} · {isCreator(biz.category) ? 'Online' : [biz.city, biz.state].filter(Boolean).join(', ') || 'Nationwide'}
         </p>
         {biz.rating && <p className="text-sm text-gray-600 mt-1"><span className="text-gold">★</span> {biz.rating}</p>}
         {biz.description && (

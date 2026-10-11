@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { CATEGORIES, SUBCATEGORIES, OTHER, needsNote } from '../../lib/categories'
+import { CATEGORIES, SUBCATEGORIES, OTHER, needsNote, isCreator, CREATORS } from '../../lib/categories'
 import { US_STATES } from '../../lib/states'
 
 export default function SubmitPage() {
@@ -20,12 +20,21 @@ export default function SubmitPage() {
     website: '',
     instagram: '',
     facebook: '',
+    tiktok: '',
+    youtube: '',
     is_lao_owned: true,
     submitter_email: ''
   })
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const creator = isCreator(form.category)
+
+  // /submit?category=Content%20Creators opens the form ready for a creator
+  useEffect(() => {
+    const c = new URLSearchParams(window.location.search).get('category')
+    if (c && CATEGORIES.some((x) => x.value === c)) setForm((f) => ({ ...f, category: c }))
+  }, [])
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target
@@ -38,14 +47,21 @@ export default function SubmitPage() {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
-    // Guardrail: a listing needs a place to visit or a link to find it online
-    if (![form.address, form.website, form.instagram, form.facebook].some((v) => v.trim())) {
+    const links = [form.website, form.instagram, form.facebook, form.tiktok, form.youtube]
+    // Guardrail: a listing needs a place to visit or a link to find it online. Creators need a link.
+    if (creator && !links.some((v) => v.trim())) {
+      setError('Please add at least one link: TikTok, Instagram, YouTube, Facebook or a website.')
+      return
+    }
+    if (!creator && ![form.address, ...links].some((v) => v.trim())) {
       setError('Please add a street address, or a website or social link if the business is online only.')
       return
     }
     setLoading(true)
     const { error } = await supabase.from('submissions').insert([{
       ...form,
+      // Creators are online only
+      ...(creator && { address: '', city: '', state: '', zip: '', phone: '' }),
       subcategory: form.category === OTHER ? null : form.subcategory,
       category_note: needsNote(form.category, form.subcategory) ? form.category_note.trim() : null,
       review_status: 'pending',
@@ -79,12 +95,16 @@ export default function SubmitPage() {
       </a>
 
       <div className="bg-white rounded-2xl border border-gray-100 p-8 mt-4">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Submit a Business</h1>
-        <p className="text-gray-500 text-sm mb-8">Know a Lao-owned or Lao-inspired business? Add it to the directory.</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">{creator ? 'Submit a Creator' : 'Submit a Business'}</h1>
+        <p className="text-gray-500 text-sm mb-8">
+          {creator
+            ? 'Know a Lao creator, or someone making content about Lao culture? Add them to LaoList.'
+            : 'Know a Lao-owned or Lao-inspired business? Add it to the directory.'}
+        </p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div>
-            <label className={labelClass}>Business Name *</label>
+            <label className={labelClass}>{creator ? 'Creator or channel name *' : 'Business Name *'}</label>
             <input name="name" required onChange={handleChange} className={inputClass} />
           </div>
 
@@ -100,7 +120,7 @@ export default function SubmitPage() {
 
           {form.category !== OTHER && (
           <div>
-            <label className={labelClass}>Subcategory *</label>
+            <label className={labelClass}>{creator ? 'Type of content *' : 'Subcategory *'}</label>
             <select
               name="subcategory"
               required
@@ -119,14 +139,14 @@ export default function SubmitPage() {
 
           {needsNote(form.category, form.subcategory) && (
             <div>
-              <label className={labelClass}>What kind of business is it? *</label>
+              <label className={labelClass}>{creator ? 'What kind of content? *' : 'What kind of business is it? *'}</label>
               <input
                 name="category_note"
                 required
                 maxLength={60}
                 value={form.category_note}
                 onChange={handleChange}
-                placeholder="Seamstress, tattoo studio, farm"
+                placeholder={creator ? 'Gaming, parenting, fitness' : 'Seamstress, tattoo studio, farm'}
                 className={inputClass}
               />
               <p className="text-xs text-gray-400 mt-1">A few words is perfect. We use these to add new categories.</p>
@@ -138,6 +158,7 @@ export default function SubmitPage() {
             <textarea name="description" onChange={handleChange} rows={3} className={inputClass} />
           </div>
 
+          {!creator && (<>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>City</label>
@@ -145,7 +166,7 @@ export default function SubmitPage() {
             </div>
             <div>
               <label className={labelClass}>State *</label>
-              <select name="state" required value={form.state} onChange={handleChange} className={inputClass}>
+              <select name="state" required={!creator} value={form.state} onChange={handleChange} className={inputClass}>
                 <option value="">Select a state</option>
                 {US_STATES.map((st) => (
                   <option key={st} value={st}>{st}</option>
@@ -171,9 +192,22 @@ export default function SubmitPage() {
             <input name="phone" onChange={handleChange} className={inputClass} />
           </div>
 
+          </>)}
+
           <div>
             <label className={labelClass}>Website</label>
             <input name="website" onChange={handleChange} className={inputClass} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>TikTok</label>
+              <input name="tiktok" value={form.tiktok} onChange={handleChange} placeholder="@handle" className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>YouTube</label>
+              <input name="youtube" value={form.youtube} onChange={handleChange} placeholder="Channel link or @handle" className={inputClass} />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -194,7 +228,7 @@ export default function SubmitPage() {
 
           <label className="flex items-center gap-3 cursor-pointer">
             <input name="is_lao_owned" type="checkbox" defaultChecked onChange={handleChange} className="w-4 h-4 accent-green-700" />
-            <span className="text-sm text-gray-700">This is a Lao-owned or Lao-inspired business</span>
+            <span className="text-sm text-gray-700">{creator ? 'This creator is Lao' : 'This is a Lao-owned or Lao-inspired business'}</span>
           </label>
 
           {error && <p className="text-sm text-red-700" role="alert">{error}</p>}
@@ -205,7 +239,7 @@ export default function SubmitPage() {
             style={{ backgroundColor: '#2d5a3d' }}
             className="text-white font-semibold py-3 rounded-full hover:opacity-90 transition mt-2"
           >
-            {loading ? 'Submitting...' : 'Submit Business'}
+            {loading ? 'Submitting...' : creator ? 'Submit Creator' : 'Submit Business'}
           </button>
         </form>
       </div>

@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
-import { categoryHref, stateHref, subcategoryHref, typeLabel } from '../../../lib/categories'
+import { categoryHref, stateHref, subcategoryHref, typeLabel, isCreator } from '../../../lib/categories'
+import { socialUrl, socialLabel } from '../../../lib/links'
 import BusinessCard from '../../components/BusinessCard'
+import CreatorCard from '../../components/CreatorCard'
 
 const GREEN = '#2d5a3d'
 
@@ -72,6 +74,7 @@ export default function BusinessPage() {
     </main>
   )
 
+  const creator = isCreator(business.category)
   const address = business.address
     ? `${business.address}, ${business.city}, ${business.state} ${business.zip || ''}`.trim()
     : business.formatted_address
@@ -98,7 +101,7 @@ export default function BusinessPage() {
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex flex-wrap gap-x-5 gap-y-2 mb-4 text-sm font-medium">
           {business.category && (
-            <a href={categoryHref(business.category)} className="inline-flex items-center gap-1" style={{ color: GREEN }}>
+            <a href={creator ? '/creators' : categoryHref(business.category)} className="inline-flex items-center gap-1" style={{ color: GREEN }}>
               <span aria-hidden>←</span> Back to all {business.category}
             </a>
           )}
@@ -115,18 +118,18 @@ export default function BusinessPage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{business.name}</h1>
               <p className="text-gray-500 mt-1 text-sm">
-                {business.category} · {[business.city, business.state].filter(Boolean).join(', ') || 'Nationwide'}
+                {business.category} · {creator ? 'Online' : [business.city, business.state].filter(Boolean).join(', ') || 'Nationwide'}
                 {business.rating && <> · <span className="text-gold">★</span> {business.rating}</>}
               </p>
               <div className="flex flex-wrap gap-2 mt-3">
                 {business.category && (
-                  <a href={categoryHref(business.category)} className="text-xs font-medium px-3 py-1 rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50">
+                  <a href={creator ? '/creators' : categoryHref(business.category)} className="text-xs font-medium px-3 py-1 rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50">
                     {business.category}
                   </a>
                 )}
                 {business.subcategory && (
                   <a
-                    href={subcategoryHref(business.category, business.subcategory)}
+                    href={creator ? '/creators?niche=' + encodeURIComponent(business.subcategory) : subcategoryHref(business.category, business.subcategory)}
                     className="text-xs font-medium px-3 py-1 rounded-full hover:opacity-80 bg-teal-tint text-teal-ink"
                   >
                     {typeLabel(business)}
@@ -136,7 +139,7 @@ export default function BusinessPage() {
             </div>
             {business.is_lao_owned && (
               <span className="bg-lao-red text-white text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap shrink-0">
-                Lao Owned
+                {creator ? 'Lao Creator' : 'Lao Owned'}
               </span>
             )}
           </div>
@@ -166,15 +169,14 @@ export default function BusinessPage() {
                 <a href={mapsUrl} target="_blank" rel="noopener" style={{ color: GREEN }} className="hover:underline text-sm">View on Google Maps</a>
               </Row>
             )}
-            {business.instagram && (
-              <Row label="Instagram">
-                <a href={'https://instagram.com/' + business.instagram.replace('@', '')} target="_blank" rel="noopener" style={{ color: GREEN }} className="hover:underline text-sm">@{business.instagram.replace('@', '')}</a>
-              </Row>
-            )}
-            {business.facebook && (
-              <Row label="Facebook">
-                <a href={facebookUrl(business.facebook)} target="_blank" rel="noopener" style={{ color: GREEN }} className="hover:underline text-sm break-all">{business.facebook}</a>
-              </Row>
+            {[['tiktok', 'TikTok'], ['youtube', 'YouTube'], ['instagram', 'Instagram'], ['facebook', 'Facebook']].map(([k, label]) =>
+              business[k] ? (
+                <Row key={k} label={label}>
+                  <a href={socialUrl(k, business[k])} target="_blank" rel="noopener" style={{ color: GREEN }} className="hover:underline text-sm break-all">
+                    {socialLabel(k, business[k])}
+                  </a>
+                </Row>
+              ) : null
             )}
           </div>
         </div>
@@ -196,7 +198,7 @@ export default function BusinessPage() {
                   ? `Discover more ${business.category} in ${business.state}`
                   : `Discover more ${business.category}`
               }
-              href={nearbyScope === 'state' ? stateHref(business.state, business.category) : categoryHref(business.category)}
+              href={creator ? '/creators' : nearbyScope === 'state' ? stateHref(business.state, business.category) : categoryHref(business.category)}
               items={nearby}
             />
           )}
@@ -218,10 +220,6 @@ function toUrl(v) {
   return /^https?:\/\//i.test(v) ? v : 'https://' + v.replace(/^\/+/, '')
 }
 
-function facebookUrl(v) {
-  if (/^https?:\/\//i.test(v) || /facebook\.com/i.test(v)) return toUrl(v)
-  return 'https://www.facebook.com/' + v.replace(/^@/, '')
-}
 
 function Row({ label, children }) {
   return (
@@ -243,7 +241,7 @@ function DiscoverSection({ title, href, items }) {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {items.map((b) => (
-          <BusinessCard key={b.id} biz={b} />
+          isCreator(b.category) ? <CreatorCard key={b.id} creator={b} /> : <BusinessCard key={b.id} biz={b} />
         ))}
       </div>
     </section>

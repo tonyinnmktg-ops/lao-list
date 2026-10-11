@@ -24,7 +24,7 @@ const LEGACY_CATEGORIES = {
 // Room for the Google lookup and AI review
 export const maxDuration = 30
 
-const TEXT_FIELDS = ['name', 'category', 'subcategory', 'category_note', 'description', 'address', 'city', 'state', 'zip', 'phone', 'website', 'instagram', 'facebook']
+const TEXT_FIELDS = ['name', 'category', 'subcategory', 'category_note', 'description', 'address', 'city', 'state', 'zip', 'phone', 'website', 'instagram', 'facebook', 'tiktok', 'youtube']
 const clean = (v) => (typeof v === 'string' ? v.trim().replace(/\s+/g, ' ') || null : v ?? null)
 
 export async function POST(req) {
@@ -61,7 +61,8 @@ export async function POST(req) {
   // 2. Enrich
   let google = null
   try {
-    google = await findOnGoogle(listing)
+    // Creators are online only, so there's nothing to look up on Google Maps
+    if (listing.category !== 'Content Creators') google = await findOnGoogle(listing)
   } catch (err) {
     console.error('Google enrichment failed', err)
   }
@@ -90,13 +91,16 @@ Submission:
 - State: ${listing.state || ''}
 - Website: ${listing.website || ''}
 - Instagram: ${listing.instagram || ''}
+- TikTok: ${listing.tiktok || ''}
+- YouTube: ${listing.youtube || ''}
 - Is Lao Owned: ${listing.is_lao_owned}
 - Submitter Email: ${submission.submitter_email}
 ${google ? `\nGoogle Maps found a matching place: ${google.name}, ${google.formatted_address}${google.types?.length ? ` (types: ${google.types.join(', ')})` : ''}\n` : ''}
 Approve if it looks like a real, legitimate business or organization with a connection to the Lao community. Reject if it looks like spam, a test, is missing a name or category, or has no apparent connection to the Lao community.
 Do not reject because an address, city, phone or other detail is missing: online-only businesses, consultants and organizations are welcome, and completeness is checked separately.
+Content creators (category "Content Creators") are online-only people or channels: approve Lao creators and creators whose content is mainly about Lao culture, food or language. They never have an address.
 
-Also write a listing description: one or two plain sentences saying what the business is and where. Use only the facts above; do not invent menu items, services, history or claims. Keep any useful detail the submitter gave (for example a former name).
+Also write a listing description: one or two plain sentences saying what the business is and where (for a creator: what they make, not where they live). Use only the facts above; do not invent menu items, services, history or claims. Keep any useful detail the submitter gave (for example a former name).
 
 Respond in this exact format:
 DECISION: approved or rejected
@@ -133,10 +137,16 @@ DESCRIPTION: the listing description`
   }
 
   // 4. Guardrail
-  const hasLink = !!(listing.website || listing.instagram || listing.facebook)
+  const creator = listing.category === 'Content Creators'
+  if (creator) Object.assign(listing, { address: null, city: null, state: null, zip: null, phone: null })
+  const hasLink = !!(listing.website || listing.instagram || listing.facebook || listing.tiktok || listing.youtube)
   const missing = []
-  if (!listing.address && !hasLink) missing.push('a street address or a website/social link')
-  if (!listing.state) missing.push('a state')
+  if (creator) {
+    if (!hasLink) missing.push('a link to their content')
+  } else {
+    if (!listing.address && !hasLink) missing.push('a street address or a website/social link')
+    if (!listing.state) missing.push('a state')
+  }
   const enrichNote = google ? ' Enriched from Google Maps.' : ''
 
   if (missing.length) {

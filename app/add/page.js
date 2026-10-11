@@ -14,6 +14,12 @@ const OPTIONS = [
     cta: 'Add an event',
   },
   {
+    href: '/submit?category=Content%20Creators',
+    title: 'A creator',
+    body: 'A Lao creator, or someone making content about Lao food, culture or language, on TikTok, YouTube, Instagram or anywhere online.',
+    cta: 'Add a creator',
+  },
+  {
     href: 'mailto:laolistapp@gmail.com?subject=Resource%20suggestion',
     title: 'A resource',
     body: 'A scholarship, legal clinic, health service or program that helps Lao Americans.',
@@ -30,7 +36,7 @@ export default function AddPage() {
       <p className="text-gray-600 mt-3 max-w-2xl leading-relaxed">
         LaoList grows through the community. Adding something is free and takes a couple of minutes.
       </p>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10">
         {OPTIONS.map((o) => (
           <a key={o.href} href={o.href} className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition flex flex-col">
             <h2 className="text-xl font-bold text-gray-900">{o.title}</h2>

@@ -3,7 +3,10 @@
 import { Suspense, useEffect, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../lib/supabase'
-import { CATEGORIES, OTHER, categoryHref } from '../lib/categories'
+import { CATEGORIES as ALL_CATEGORIES, OTHER, CREATORS, categoryHref } from '../lib/categories'
+
+// Creators have their own page; the business directory and its filters leave them out
+const CATEGORIES = ALL_CATEGORIES.filter((c) => c.value !== CREATORS)
 import BusinessCard from './components/BusinessCard'
 import FAQSection from './components/FAQSection'
 import EventCard from './components/EventCard'
@@ -45,6 +48,7 @@ function HomeInner() {
   const [searchInput, setSearchInput] = useState(q)
   const [featured, setFeatured] = useState([])
   const [upcoming, setUpcoming] = useState([])
+  const [creatorCount, setCreatorCount] = useState(null)
   const [upcomingCount, setUpcomingCount] = useState(null)
   const [resourceHighlights, setResourceHighlights] = useState([])
   const [resourceCount, setResourceCount] = useState(null)
@@ -95,6 +99,10 @@ function HomeInner() {
         const c = {}
         const s = new Set()
         data.forEach((b) => {
+          if (b.category === CREATORS) {
+            setCreatorCount((n) => (n || 0) + 1)
+            return
+          }
           c[b.category] = (c[b.category] || 0) + 1
           if (b.state) s.add(b.state)
         })
@@ -152,6 +160,7 @@ function HomeInner() {
     }
     if (state) query = query.eq('state', state)
     if (category) query = query.eq('category', category)
+    else query = query.neq('category', CREATORS)
     if (metro) {
       query = query
         .in('city', [...new Set(metro.places.map((p) => p[0]))])
@@ -272,6 +281,7 @@ function HomeInner() {
           <nav className="flex flex-wrap justify-center gap-2 mt-6" aria-label="Explore LaoList">
             {[
               { href: '/directory', label: 'Businesses', count: totalBusinesses },
+              { href: '/creators', label: 'Creators', count: creatorCount },
               { href: '/events', label: 'Events', count: upcomingCount },
               { href: '/resources', label: 'Resources', count: resourceCount },
             ].map((l) => (
