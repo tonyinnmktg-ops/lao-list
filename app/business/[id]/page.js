@@ -7,6 +7,7 @@ import { categoryHref, stateHref, subcategoryHref, typeLabel, isCreator } from '
 import { socialUrl, socialLabel } from '../../../lib/links'
 import BusinessCard from '../../components/BusinessCard'
 import CreatorCard from '../../components/CreatorCard'
+import Avatar from '../../components/Avatar'
 
 const GREEN = '#2d5a3d'
 
@@ -115,7 +116,9 @@ export default function BusinessPage() {
         )}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <div className="flex items-start justify-between mb-6 gap-4">
-            <div>
+            <div className={creator ? 'flex items-start gap-4' : ''}>
+              {creator && <Avatar person={business} size={88} />}
+              <div>
               <h1 className="text-2xl font-bold text-gray-900">{business.name}</h1>
               <p className="text-gray-500 mt-1 text-sm">
                 {business.category} · {[business.city, business.state].filter(Boolean).join(', ') || (creator ? 'Online' : 'Nationwide')}
@@ -135,6 +138,7 @@ export default function BusinessPage() {
                     {typeLabel(business)}
                   </a>
                 )}
+              </div>
               </div>
             </div>
             {business.is_lao_owned && (
