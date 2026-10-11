@@ -18,9 +18,8 @@ const inter = Inter({
   display: "swap",
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
+// The public address for share previews and links. NEXT_PUBLIC_SITE_URL can override it (e.g. for local testing).
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://laolist.app";
 
 const title = "LaoList | Lao-Owned Businesses in the US";
 const description = "A free community directory of Lao-owned and Lao-inspired businesses and organizations across the United States.";
