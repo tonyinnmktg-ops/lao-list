@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { CATEGORIES, SUBCATEGORIES, OTHER, needsNote, isCreator, CREATORS } from '../../lib/categories'
+import { CATEGORIES, SUBCATEGORIES, OTHER, needsNote, isCreator, isOnlineOnly } from '../../lib/categories'
 import { US_STATES } from '../../lib/states'
 
 export default function SubmitPage() {
@@ -28,7 +28,8 @@ export default function SubmitPage() {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const creator = isCreator(form.category)
+  const creator = isCreator(form.category) // a person: content creator or artist
+  const onlineOnly = isOnlineOnly(form.category)
 
   // /submit?category=Content%20Creators opens the form ready for a creator
   useEffect(() => {
@@ -60,8 +61,9 @@ export default function SubmitPage() {
     setLoading(true)
     const { error } = await supabase.from('submissions').insert([{
       ...form,
-      // Creators are online only
-      ...(creator && { address: '', city: '', state: '', zip: '', phone: '' }),
+      // People never get a street address or phone; content creators get no location at all
+      ...(creator && { address: '', zip: '', phone: '' }),
+      ...(onlineOnly && { city: '', state: '' }),
       subcategory: form.category === OTHER ? null : form.subcategory,
       category_note: needsNote(form.category, form.subcategory) ? form.category_note.trim() : null,
       review_status: 'pending',
@@ -95,16 +97,16 @@ export default function SubmitPage() {
       </a>
 
       <div className="bg-white rounded-2xl border border-gray-100 p-8 mt-4">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">{creator ? 'Submit a Creator' : 'Submit a Business'}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">{creator ? 'Submit an Artist or Creator' : 'Submit a Business'}</h1>
         <p className="text-gray-500 text-sm mb-8">
           {creator
-            ? 'Know a Lao creator, or someone making content about Lao culture? Add them to LaoList.'
+            ? 'Know a Lao artist or creator, or someone whose work centers Lao culture? Add them to LaoList.'
             : 'Know a Lao-owned or Lao-inspired business? Add it to the directory.'}
         </p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div>
-            <label className={labelClass}>{creator ? 'Creator or channel name *' : 'Business Name *'}</label>
+            <label className={labelClass}>{creator ? 'Name (artist, creator or channel) *' : 'Business Name *'}</label>
             <input name="name" required onChange={handleChange} className={inputClass} />
           </div>
 
@@ -120,7 +122,7 @@ export default function SubmitPage() {
 
           {form.category !== OTHER && (
           <div>
-            <label className={labelClass}>{creator ? 'Type of content *' : 'Subcategory *'}</label>
+            <label className={labelClass}>{creator ? 'Type of work *' : 'Subcategory *'}</label>
             <select
               name="subcategory"
               required
@@ -139,7 +141,7 @@ export default function SubmitPage() {
 
           {needsNote(form.category, form.subcategory) && (
             <div>
-              <label className={labelClass}>{creator ? 'What kind of content? *' : 'What kind of business is it? *'}</label>
+              <label className={labelClass}>{creator ? 'What kind of work? *' : 'What kind of business is it? *'}</label>
               <input
                 name="category_note"
                 required
@@ -158,23 +160,28 @@ export default function SubmitPage() {
             <textarea name="description" onChange={handleChange} rows={3} className={inputClass} />
           </div>
 
-          {!creator && (<>
+          {!onlineOnly && (
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>City</label>
               <input name="city" onChange={handleChange} className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>State *</label>
+              <label className={labelClass}>{creator ? 'State' : 'State *'}</label>
               <select name="state" required={!creator} value={form.state} onChange={handleChange} className={inputClass}>
-                <option value="">Select a state</option>
+                <option value="">{creator ? 'Optional' : 'Select a state'}</option>
                 {US_STATES.map((st) => (
                   <option key={st} value={st}>{st}</option>
                 ))}
               </select>
             </div>
           </div>
+          )}
+          {creator && !onlineOnly && (
+            <p className="text-xs text-gray-400 -mt-3">Where they're based, if they perform or show work locally. Leave blank if not.</p>
+          )}
 
+          {!creator && (<>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Street Address</label>
@@ -228,7 +235,7 @@ export default function SubmitPage() {
 
           <label className="flex items-center gap-3 cursor-pointer">
             <input name="is_lao_owned" type="checkbox" defaultChecked onChange={handleChange} className="w-4 h-4 accent-green-700" />
-            <span className="text-sm text-gray-700">{creator ? 'This creator is Lao' : 'This is a Lao-owned or Lao-inspired business'}</span>
+            <span className="text-sm text-gray-700">{creator ? 'This artist or creator is Lao' : 'This is a Lao-owned or Lao-inspired business'}</span>
           </label>
 
           {error && <p className="text-sm text-red-700" role="alert">{error}</p>}
@@ -239,7 +246,7 @@ export default function SubmitPage() {
             style={{ backgroundColor: '#2d5a3d' }}
             className="text-white font-semibold py-3 rounded-full hover:opacity-90 transition mt-2"
           >
-            {loading ? 'Submitting...' : creator ? 'Submit Creator' : 'Submit Business'}
+            {loading ? 'Submitting...' : creator ? 'Submit' : 'Submit Business'}
           </button>
         </form>
       </div>

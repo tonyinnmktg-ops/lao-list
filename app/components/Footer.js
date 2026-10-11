@@ -20,7 +20,7 @@ export default function Footer() {
           <ul className="flex flex-col gap-2 text-sm opacity-80">
             <li><Link href="/directory" className="hover:opacity-100">Businesses</Link></li>
             <li><Link href="/events" className="hover:opacity-100">Events</Link></li>
-            <li><Link href="/creators" className="hover:opacity-100">Creators</Link></li>
+            <li><Link href="/creators" className="hover:opacity-100">Artists &amp; Creators</Link></li>
             <li><Link href="/resources" className="hover:opacity-100">Resources</Link></li>
             <li><Link href="/#categories" className="hover:opacity-100">Business categories</Link></li>
           </ul>
@@ -31,7 +31,7 @@ export default function Footer() {
           <ul className="flex flex-col gap-2 text-sm opacity-80">
             <li><Link href="/submit" className="hover:opacity-100">Add a business</Link></li>
             <li><Link href="/events/submit" className="hover:opacity-100">Add an event</Link></li>
-            <li><Link href="/submit?category=Content%20Creators" className="hover:opacity-100">Add a creator</Link></li>
+            <li><Link href="/submit?category=Content%20Creators" className="hover:opacity-100">Add an artist or creator</Link></li>
             <li><a href="mailto:laolistapp@gmail.com?subject=Resource%20suggestion" className="hover:opacity-100">Suggest a resource</a></li>
           </ul>
         </div>

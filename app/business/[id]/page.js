@@ -101,7 +101,7 @@ export default function BusinessPage() {
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex flex-wrap gap-x-5 gap-y-2 mb-4 text-sm font-medium">
           {business.category && (
-            <a href={creator ? '/creators' : categoryHref(business.category)} className="inline-flex items-center gap-1" style={{ color: GREEN }}>
+            <a href={creator ? '/creators?type=' + encodeURIComponent(business.category) : categoryHref(business.category)} className="inline-flex items-center gap-1" style={{ color: GREEN }}>
               <span aria-hidden>←</span> Back to all {business.category}
             </a>
           )}
@@ -118,18 +118,18 @@ export default function BusinessPage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{business.name}</h1>
               <p className="text-gray-500 mt-1 text-sm">
-                {business.category} · {creator ? 'Online' : [business.city, business.state].filter(Boolean).join(', ') || 'Nationwide'}
+                {business.category} · {[business.city, business.state].filter(Boolean).join(', ') || (creator ? 'Online' : 'Nationwide')}
                 {business.rating && <> · <span className="text-gold">★</span> {business.rating}</>}
               </p>
               <div className="flex flex-wrap gap-2 mt-3">
                 {business.category && (
-                  <a href={creator ? '/creators' : categoryHref(business.category)} className="text-xs font-medium px-3 py-1 rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50">
+                  <a href={creator ? '/creators?type=' + encodeURIComponent(business.category) : categoryHref(business.category)} className="text-xs font-medium px-3 py-1 rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50">
                     {business.category}
                   </a>
                 )}
                 {business.subcategory && (
                   <a
-                    href={creator ? '/creators?niche=' + encodeURIComponent(business.subcategory) : subcategoryHref(business.category, business.subcategory)}
+                    href={creator ? '/creators?type=' + encodeURIComponent(business.category) + '&niche=' + encodeURIComponent(business.subcategory) : subcategoryHref(business.category, business.subcategory)}
                     className="text-xs font-medium px-3 py-1 rounded-full hover:opacity-80 bg-teal-tint text-teal-ink"
                   >
                     {typeLabel(business)}
@@ -139,7 +139,7 @@ export default function BusinessPage() {
             </div>
             {business.is_lao_owned && (
               <span className="bg-lao-red text-white text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap shrink-0">
-                {creator ? 'Lao Creator' : 'Lao Owned'}
+                {creator ? (business.category === 'Content Creators' ? 'Lao Creator' : 'Lao Artist') : 'Lao Owned'}
               </span>
             )}
           </div>

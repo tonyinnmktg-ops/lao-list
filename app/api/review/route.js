@@ -62,7 +62,7 @@ export async function POST(req) {
   let google = null
   try {
     // Creators are online only, so there's nothing to look up on Google Maps
-    if (listing.category !== 'Content Creators') google = await findOnGoogle(listing)
+    if (!['Content Creators', 'Visual Artists', 'Performing Artists'].includes(listing.category)) google = await findOnGoogle(listing)
   } catch (err) {
     console.error('Google enrichment failed', err)
   }
@@ -98,9 +98,9 @@ Submission:
 ${google ? `\nGoogle Maps found a matching place: ${google.name}, ${google.formatted_address}${google.types?.length ? ` (types: ${google.types.join(', ')})` : ''}\n` : ''}
 Approve if it looks like a real, legitimate business or organization with a connection to the Lao community. Reject if it looks like spam, a test, is missing a name or category, or has no apparent connection to the Lao community.
 Do not reject because an address, city, phone or other detail is missing: online-only businesses, consultants and organizations are welcome, and completeness is checked separately.
-Content creators (category "Content Creators") are online-only people or channels: approve Lao creators and creators whose content is mainly about Lao culture, food or language. They never have an address.
+Content creators, visual artists and performing artists are individual people or groups, not businesses: approve Lao creators and artists, and those whose work is mainly about Lao culture, food or language. They never have a street address.
 
-Also write a listing description: one or two plain sentences saying what the business is and where (for a creator: what they make, not where they live). Use only the facts above; do not invent menu items, services, history or claims. Keep any useful detail the submitter gave (for example a former name).
+Also write a listing description: one or two plain sentences saying what the business is and where (for a creator or artist: what they make or perform, not where they live). Use only the facts above; do not invent menu items, services, history or claims. Keep any useful detail the submitter gave (for example a former name).
 
 Respond in this exact format:
 DECISION: approved or rejected
@@ -137,8 +137,10 @@ DESCRIPTION: the listing description`
   }
 
   // 4. Guardrail
-  const creator = listing.category === 'Content Creators'
-  if (creator) Object.assign(listing, { address: null, city: null, state: null, zip: null, phone: null })
+  // People (content creators and artists) never get a street address or phone; content creators get no location
+  const creator = ['Content Creators', 'Visual Artists', 'Performing Artists'].includes(listing.category)
+  if (creator) Object.assign(listing, { address: null, zip: null, phone: null })
+  if (listing.category === 'Content Creators') Object.assign(listing, { city: null, state: null })
   const hasLink = !!(listing.website || listing.instagram || listing.facebook || listing.tiktok || listing.youtube)
   const missing = []
   if (creator) {

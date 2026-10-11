@@ -205,7 +205,7 @@ export default function SuggestEditPage() {
 
         <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
           <input type="checkbox" checked={form.is_lao_owned} onChange={(e) => set('is_lao_owned', e.target.checked)} style={{ accentColor: GREEN }} className="w-4 h-4" />
-          {isCreator(form.category) ? 'This creator is Lao' : 'This business is Lao-owned'}
+          {isCreator(form.category) ? 'This artist or creator is Lao' : 'This business is Lao-owned'}
         </label>
 
         <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">

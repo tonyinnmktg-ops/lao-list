@@ -2,6 +2,7 @@ import { typeLabel } from '../../lib/categories'
 import { PLATFORMS, socialUrl, toUrl } from '../../lib/links'
 
 const GREEN = '#2d5a3d'
+const TYPE_LABEL = { 'Content Creators': 'Content creator', 'Visual Artists': 'Visual artist', 'Performing Artists': 'Performing artist' }
 
 export default function CreatorCard({ creator }) {
   const links = PLATFORMS.filter((p) => creator[p.key])
@@ -15,6 +16,9 @@ export default function CreatorCard({ creator }) {
       <a href={'/business/' + creator.id} className="hover:underline">
         <h3 className="text-lg font-semibold text-gray-900 leading-snug">{creator.name}</h3>
       </a>
+      <p className="text-xs text-gray-500 mt-1">
+        {[TYPE_LABEL[creator.category], [creator.city, creator.state].filter(Boolean).join(', ')].filter(Boolean).join(' · ')}
+      </p>
       {creator.description && <p className="text-sm text-gray-600 mt-2 line-clamp-3 flex-1">{creator.description}</p>}
       {links.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-4">

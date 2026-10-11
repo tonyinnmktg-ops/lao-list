@@ -3,10 +3,10 @@
 import { Suspense, useEffect, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../lib/supabase'
-import { CATEGORIES as ALL_CATEGORIES, OTHER, CREATORS, categoryHref } from '../lib/categories'
+import { CATEGORIES as ALL_CATEGORIES, OTHER, PEOPLE, categoryHref } from '../lib/categories'
 
-// Creators have their own page; the business directory and its filters leave them out
-const CATEGORIES = ALL_CATEGORIES.filter((c) => c.value !== CREATORS)
+// Artists and creators have their own page; the business directory and its filters leave them out
+const CATEGORIES = ALL_CATEGORIES.filter((c) => !PEOPLE.includes(c.value))
 import BusinessCard from './components/BusinessCard'
 import FAQSection from './components/FAQSection'
 import EventCard from './components/EventCard'
@@ -99,7 +99,7 @@ function HomeInner() {
         const c = {}
         const s = new Set()
         data.forEach((b) => {
-          if (b.category === CREATORS) {
+          if (PEOPLE.includes(b.category)) {
             setCreatorCount((n) => (n || 0) + 1)
             return
           }
@@ -160,7 +160,7 @@ function HomeInner() {
     }
     if (state) query = query.eq('state', state)
     if (category) query = query.eq('category', category)
-    else query = query.neq('category', CREATORS)
+    else query = query.not('category', 'in', `(${PEOPLE.map((c) => `"${c}"`).join(',')})`)
     if (metro) {
       query = query
         .in('city', [...new Set(metro.places.map((p) => p[0]))])
@@ -281,7 +281,7 @@ function HomeInner() {
           <nav className="flex flex-wrap justify-center gap-2 mt-6" aria-label="Explore LaoList">
             {[
               { href: '/directory', label: 'Businesses', count: totalBusinesses },
-              { href: '/creators', label: 'Creators', count: creatorCount },
+              { href: '/creators', label: 'Artists & Creators', count: creatorCount },
               { href: '/events', label: 'Events', count: upcomingCount },
               { href: '/resources', label: 'Resources', count: resourceCount },
             ].map((l) => (

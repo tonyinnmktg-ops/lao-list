@@ -15,9 +15,9 @@ const OPTIONS = [
   },
   {
     href: '/submit?category=Content%20Creators',
-    title: 'A creator',
-    body: 'A Lao creator, or someone making content about Lao food, culture or language, on TikTok, YouTube, Instagram or anywhere online.',
-    cta: 'Add a creator',
+    title: 'An artist or creator',
+    body: 'A Lao musician, actor, dancer, photographer, visual artist or content creator, or someone whose work centers Lao culture.',
+    cta: 'Add an artist or creator',
   },
   {
     href: 'mailto:laolistapp@gmail.com?subject=Resource%20suggestion',
